@@ -1,0 +1,13 @@
+<div *ngIf="!refs || refs.length === 0; else noRefs">
+  Ваш список рефералов пуст
+</div>
+<ng-template #noRefs>
+  <ul class="ref-list">
+    <li *ngFor="let ref of refs; let i = index" class="ref-list__item">
+      <div *ngIf="ref.length > 0" >
+        <span class="headline">Рефераллы {{i + 1}} уровня:</span>
+        {{getRefDescrLevel(ref)}}
+      </div>
+    </li>
+  </ul>
+</ng-template>

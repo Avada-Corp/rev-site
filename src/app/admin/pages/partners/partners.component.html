@@ -1,0 +1,193 @@
+<div class="partners-container">
+    <!-- Добавляем ConfirmDialog для подтверждения действий -->
+    <p-confirmDialog></p-confirmDialog>
+
+    <h2>Управление партнерами</h2>
+
+    <div class="table-actions">
+        <p-button label="Добавить партнера" icon="pi pi-plus" (click)="addNewPartner()" [disabled]="loading"
+            styleClass="p-button-success">
+        </p-button>
+    </div>
+
+    <p-table [value]="partners" styleClass="partners-table">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Тип партнера</th>
+                <th>Партнер</th>
+                <th>Тип комиссии</th>
+                <th>Процент/Платеж</th>
+                <th>Доп. настройки</th>
+                <th>Действия</th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-partner let-i="rowIndex">
+            <tr>
+                <!-- Тип партнера -->
+                <td>
+                    <div *ngIf="!partner.isEditing" class="display-value">
+                        {{ getPartnerTypeLabel(partner.partnerType) }}
+                    </div>
+                    <div *ngIf="partner.isEditing" class="partner-type-radio">
+                        <div class="radio-option">
+                            <p-radioButton name="partnerType{{i}}" value="internal" [(ngModel)]="partner.partnerType"
+                                (onClick)="onPartnerTypeChange(partner)" [disabled]="true">
+                            </p-radioButton>
+                            <label class="radio-label radio-disabled">Внутренний (временно недоступен)</label>
+                        </div>
+                        <div class="radio-option">
+                            <p-radioButton name="partnerType{{i}}" value="external" [(ngModel)]="partner.partnerType"
+                                (onClick)="onPartnerTypeChange(partner)">
+                            </p-radioButton>
+                            <label class="radio-label">Внешний</label>
+                        </div>
+                    </div>
+                </td>
+
+                <!-- Партнер -->
+                <td>
+                    <div *ngIf="!partner.isEditing" class="display-value">
+                        <div class="user-item" *ngIf="partner.email">
+                            <span class="user-name" *ngIf="partner.username">{{ partner.username
+                                }}</span>
+                            <span class="user-email" *ngIf="partner.username">({{ partner.email
+                                }})</span>
+                            <span class="user-email" *ngIf="!partner.username">{{ partner.email
+                                }}</span>
+                        </div>
+                        <span *ngIf="!partner.email" class="text-muted">Не выбран</span>
+                    </div>
+                    <div *ngIf="partner.isEditing">
+                        <p-dropdown [(ngModel)]="partner.editingUser" [options]="users" optionLabel="email"
+                            placeholder="Выберите пользователя" [showClear]="true" [filter]="true"
+                            filterBy="email,username" appendTo="body" [style]="{'width': '100%'}">
+                            <ng-template let-user pTemplate="item">
+                                <div class="user-item">
+                                    <span class="user-name" *ngIf="user.username">{{ user.username }}</span>
+                                    <span class="user-email" *ngIf="user.username">({{ user.email }})</span>
+                                    <span class="user-email" *ngIf="!user.username">{{ user.email }}</span>
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                        <!-- Показываем выбранного пользователя -->
+                        <div *ngIf="partner.editingUser" class="selected-user-display">
+                            <small class="text-muted">Выбран: {{ partner.editingUser.username ||
+                                partner.editingUser.email }}</small>
+                        </div>
+                    </div>
+                </td>
+
+                <!-- Тип комиссии -->
+                <td>
+                    <div *ngIf="!partner.isEditing" class="display-value">
+                        {{ getCommissionTypeLabel(partner.commissionType) || 'Не выбран' }}
+                    </div>
+                    <div *ngIf="partner.isEditing">
+                        <p-dropdown [(ngModel)]="partner.commissionType"
+                            [options]="getAvailableCommissionTypes(partner.partnerType)" optionLabel="label"
+                            optionValue="value" placeholder="Выберите тип" appendTo="body" [style]="{'width': '100%'}">
+                        </p-dropdown>
+                    </div>
+                </td>
+
+                <!-- Процент/Платеж -->
+                <td>
+                    <div *ngIf="!partner.isEditing" class="display-value">
+                        <div *ngIf="isFixedPaymentType(partner)">
+                            ${{ partner.fixedPayment || 0 }}
+                        </div>
+                        <div *ngIf="isGeneralRulesType(partner)" class="text-muted">
+                            Автоматически
+                        </div>
+                        <div *ngIf="!isFixedPaymentType(partner) && !isGeneralRulesType(partner)">
+                            {{ partner.commissionPercent || 0 }}%
+                        </div>
+                    </div>
+                    <div *ngIf="partner.isEditing">
+                        <!-- Фиксированный платеж -->
+                        <div *ngIf="isFixedPaymentType(partner)">
+                            <p-inputNumber [(ngModel)]="partner.fixedPayment" mode="currency" currency="USD" [min]="0"
+                                placeholder="0.00">
+                            </p-inputNumber>
+                        </div>
+                        <!-- Процент -->
+                        <div *ngIf="!isFixedPaymentType(partner) && !isGeneralRulesType(partner)">
+                            <p-inputNumber [(ngModel)]="partner.commissionPercent" mode="decimal" [min]="0" [max]="100"
+                                suffix="%" placeholder="0.00">
+                            </p-inputNumber>
+                        </div>
+                        <!-- Для типа "по общим правилам" процент не вводится -->
+                        <div *ngIf="isGeneralRulesType(partner)" class="text-muted general-rules-note">
+                            Автоматически
+                        </div>
+                    </div>
+                </td>
+
+
+
+                <!-- Доп. настройки -->
+                <td>
+                    <div *ngIf="!partner.isEditing" class="display-value">
+                        <div *ngIf="isExternalPartner(partner) && isGeneralRulesType(partner)">
+                            <span *ngIf="partner.disableReferralProgram" class="feature-tag feature-enabled">
+                                <i class="pi pi-check-circle"></i> Без рефералки (-30%)
+                            </span>
+                            <span *ngIf="!partner.disableReferralProgram" class="feature-tag feature-disabled">
+                                <i class="pi pi-times-circle"></i> С рефералкой
+                            </span>
+                        </div>
+                        <span *ngIf="!isExternalPartner(partner) || !isGeneralRulesType(partner)"
+                            class="text-muted">-</span>
+                    </div>
+                    <div *ngIf="partner.isEditing">
+                        <!-- Галка отключения реферальной программы для внешних партнеров с типом "general_rules" -->
+                        <div *ngIf="isExternalPartner(partner) && isGeneralRulesType(partner)">
+                            <p-checkbox [(ngModel)]="partner.disableReferralProgram" [binary]="true"
+                                label="Отключить рефералку (-30%)" styleClass="disable-referral-checkbox">
+                            </p-checkbox>
+                        </div>
+                        <span *ngIf="!isExternalPartner(partner) || !isGeneralRulesType(partner)"
+                            class="text-muted">-</span>
+                    </div>
+                </td>
+
+                <!-- Действия -->
+                <td>
+                    <div class="table-actions-cell">
+                        <div *ngIf="!partner.isEditing">
+                            <p-button icon="pi pi-pencil" (click)="editPartner(partner)" pTooltip="Редактировать"
+                                tooltipPosition="top" styleClass="p-button-text p-button-sm">
+                            </p-button>
+                            <p-button icon="pi pi-trash" (click)="deletePartner(i)" pTooltip="Удалить"
+                                tooltipPosition="top" styleClass="p-button-text p-button-sm p-button-danger">
+                            </p-button>
+                        </div>
+                        <div *ngIf="partner.isEditing">
+                            <p-button icon="pi pi-check" (click)="savePartner(partner, i)" pTooltip="Сохранить"
+                                tooltipPosition="top" styleClass="p-button-text p-button-sm p-button-success">
+                            </p-button>
+                            <p-button icon="pi pi-times" (click)="cancelEdit(partner, i)" pTooltip="Отменить"
+                                tooltipPosition="top" styleClass="p-button-text p-button-sm p-button-secondary">
+                            </p-button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="6" class="text-center">
+                    <div class="empty-message">
+                        <i class="pi pi-users" style="font-size: 2rem; color: #ccc;"></i>
+                        <p>Партнеры не найдены</p>
+                        <p-button label="Добавить первого партнера" icon="pi pi-plus" (click)="addNewPartner()"
+                            styleClass="p-button-text">
+                        </p-button>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>

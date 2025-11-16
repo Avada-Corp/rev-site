@@ -1,0 +1,21 @@
+.container {
+  height: 50vh;
+}
+.formClass {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+.formClass > div {
+  width: 40%;
+}
+.formClass input {
+  margin: 5px;
+}
+.dfc {
+  margin-bottom: 20px;
+}
+.formClass > span {
+  font-size: smaller;
+  color: red;
+}

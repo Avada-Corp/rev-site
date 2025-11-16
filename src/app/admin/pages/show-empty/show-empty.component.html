@@ -1,0 +1,19 @@
+<p-table [value]="controlApiService.emptyUsers" [tableStyle]="{ 'min-width': '50rem' }">
+    <ng-template pTemplate="header">
+        <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Parent ref</th>
+            <th>Register date</th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-user>
+        <tr>
+            <td><a target="_blank" href="https://t.me/{{user.name.replace('@', '')}}">{{ user.name?.startsWith('@') ?
+                    user.name : "" }}</a></td>
+            <td>{{ user.name?.startsWith('@') ? "" : user.name }}</td>
+            <td>{{ user.parentRef }}</td>
+            <td>{{ user.regDate }}</td>
+        </tr>
+    </ng-template>
+</p-table>

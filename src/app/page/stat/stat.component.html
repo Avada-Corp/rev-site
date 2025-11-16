@@ -1,0 +1,37 @@
+<app-date-range-select [dispatchFunc]="getReports" [email]="email"></app-date-range-select>
+<div *ngIf="allReports.length > 0">
+
+    <div>Итого по всем ключам: {{allSum | number: '1.2-2'}}
+    </div>
+    <div *ngFor="let reports of allReports">
+
+        <p-table [value]="reports" styleClass="p-datatable-gridlines" [tableStyle]="{ 'min-width': '50rem' }">
+            <ng-template pTemplate="caption"> Отчеты (отчеты рассчитывают только доступные значения) </ng-template>
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Имя</th>
+                    <th>Дата начала</th>
+                    <th>Дата окончания</th>
+                    <th>Трансферы</th>
+                    <th>Общий баланс</th>
+                    <th>Пнл</th>
+                    <th>Доступный баланс</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-report>
+                <tr>
+                    <td>{{ report.apiName }}</td>
+                    <td>{{ toLocale(report.start) }}</td>
+                    <td>{{ toLocale(report.to) }}</td>
+                    <td>{{ report.transfers | json }}</td>
+                    <td>{{ report.totalBalance | number: '1.2-2' }}</td>
+                    <td>{{ report.pnl | number: '1.2-2' }}</td>
+                    <td>{{ report.avalBalance | number: '1.2-2' }}</td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="summary">Итого по ключу {{reports[0].apiName}}: {{results[reports[0].apiName] |
+                number: '1.2-2'}}
+            </ng-template>
+        </p-table>
+    </div>
+</div>

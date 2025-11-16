@@ -1,0 +1,191 @@
+<p-toast></p-toast>
+<div class="promo-history-container">
+  <div class="header">
+    <h2>История Промо</h2>
+    <div class="header-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="backToGroupedView()"
+        *ngIf="viewMode === 'user'"
+      >
+        ← Назад к группировке
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="loadAllInteractions()"
+        [disabled]="loading"
+      >
+        Обновить
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Загрузка...</span>
+    </div>
+  </div>
+
+  <!-- Группировка по сценам -->
+  <div *ngIf="!loading && viewMode === 'grouped'" class="grouped-view">
+    <div class="info-section">
+      <p class="info-text">
+        Всего взаимодействий: <strong>{{ allInteractions.length }}</strong> |
+        Уникальных пользователей: <strong>{{ uniqueChatIds.length }}</strong> |
+        Сцен с просмотрами: <strong>{{ sceneGroups.length }}</strong>
+      </p>
+    </div>
+
+    <div *ngIf="sceneGroups.length === 0" class="empty-state">
+      <p>Нет данных о просмотрах сцен</p>
+    </div>
+
+    <div *ngIf="sceneGroups.length > 0" class="scene-groups">
+      <div *ngFor="let group of sceneGroups" class="scene-group-card">
+        <div class="scene-group-header" (click)="toggleSceneGroup(group)" style="cursor: pointer;">
+          <div class="scene-header-content">
+            <span class="expand-icon">{{ group.isExpanded ? '▼' : '▶' }}</span>
+            <h3>Сцена: {{ group.sceneId }}</h3>
+          </div>
+          <span class="badge badge-info">
+            {{ group.users.length }} {{ group.users.length === 1 ? 'пользователь' : 'пользователей' }}
+          </span>
+        </div>
+        <div class="scene-group-body" *ngIf="group.isExpanded">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Пользователь</th>
+                <th>Количество просмотров</th>
+                <th>Последний просмотр</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let user of group.users">
+                <td>
+                  <a
+                    *ngIf="getUserLink(user.username)"
+                    [href]="getUserLink(user.username)"
+                    target="_blank"
+                    class="user-link"
+                  >
+                    {{ getUserDisplayName(user.chatId, user.username) }}
+                  </a>
+                  <span *ngIf="!getUserLink(user.username)">
+                    {{ getUserDisplayName(user.chatId, user.username) }}
+                  </span>
+                </td>
+                <td>{{ user.viewCount }}</td>
+                <td>{{ formatDate(user.lastViewed) }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-primary"
+                    (click)="switchToUserView(user.chatId)"
+                  >
+                    Показать историю
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- История конкретного пользователя -->
+  <div *ngIf="!loading && viewMode === 'user'" class="user-view">
+    <div class="user-header">
+      <h3>
+        История пользователя:
+        <a
+          *ngIf="getUserLink(getCurrentUserUsername())"
+          [href]="getUserLink(getCurrentUserUsername())"
+          target="_blank"
+          class="user-link"
+        >
+          {{ getUserDisplayName(selectedChatId || 0, getCurrentUserUsername()) }}
+        </a>
+        <span *ngIf="!getUserLink(getCurrentUserUsername())">
+          {{ getUserDisplayName(selectedChatId || 0, getCurrentUserUsername()) }}
+        </span>
+      </h3>
+      <p class="info-text">
+        Всего записей: <strong>{{ userInteractions.length }}</strong>
+      </p>
+    </div>
+
+    <div *ngIf="userInteractions.length === 0" class="empty-state">
+      <p>Нет данных о взаимодействиях для этого пользователя</p>
+    </div>
+
+    <div *ngIf="userInteractions.length > 0" class="interactions-table">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Тип</th>
+            <th>Дата</th>
+            <th>Сцена/Напоминание</th>
+            <th>Детали</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let interaction of userInteractions">
+            <td>
+              <span class="badge" [ngClass]="{
+                'badge-primary': interaction.type === 'scene_view',
+                'badge-success': interaction.type === 'reminder_sent',
+                'badge-info': interaction.type === 'reminder_read'
+              }">
+                {{ getTypeLabel(interaction.type) }}
+              </span>
+            </td>
+            <td>{{ formatDate(interaction.createdAt) }}</td>
+            <td>
+              <div *ngIf="interaction.type === 'scene_view'">
+                <strong>ID:</strong> {{ interaction.sceneId || 'N/A' }}<br />
+                <span *ngIf="interaction.sceneText" class="scene-text">
+                  {{ interaction.sceneText }}
+                </span>
+              </div>
+              <div *ngIf="interaction.type === 'reminder_sent' || interaction.type === 'reminder_read'">
+                <span *ngIf="interaction.reminderText" class="reminder-text">
+                  {{ interaction.reminderText }}
+                </span>
+                <span *ngIf="!interaction.reminderText">N/A</span>
+              </div>
+            </td>
+            <td>
+              <div *ngIf="interaction.type === 'scene_view'">
+                <small *ngIf="interaction.previousSceneId">
+                  Предыдущая сцена: {{ interaction.previousSceneId }}
+                </small>
+                <div *ngIf="interaction.sceneButtons && interaction.sceneButtons.length > 0" class="buttons-info">
+                  <small>Кнопки: {{ interaction.sceneButtons.length }}</small>
+                </div>
+              </div>
+              <div *ngIf="interaction.type === 'reminder_sent'">
+                <small *ngIf="interaction.sentAt">
+                  Отправлено: {{ formatDate(interaction.sentAt) }}
+                </small>
+              </div>
+              <div *ngIf="interaction.type === 'reminder_read'">
+                <small *ngIf="interaction.readAt">
+                  Прочитано: {{ formatDate(interaction.readAt) }}
+                </small>
+                <small *ngIf="interaction.isRead !== undefined">
+                  Статус: {{ interaction.isRead ? 'Прочитано' : 'Не прочитано' }}
+                </small>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+

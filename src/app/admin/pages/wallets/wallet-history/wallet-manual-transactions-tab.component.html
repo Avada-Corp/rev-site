@@ -1,0 +1,25 @@
+<p-table [value]="getSortedTransactions()" styleClass="p-datatable-striped">
+    <ng-template pTemplate="header">
+        <tr>
+            <th pSortableColumn="date">Дата <p-sortIcon [field]="'date'"></p-sortIcon></th>
+            <th pSortableColumn="explanation">Описание <p-sortIcon [field]="'explanation'"></p-sortIcon></th>
+            <th pSortableColumn="amount">Сумма <p-sortIcon [field]="'amount'"></p-sortIcon></th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-transaction>
+        <tr>
+            <td>{{ transaction.date | date:'dd.MM.yyyy HH:mm' }}</td>
+            <td>
+                <div class="commission-explanation">{{formatExplanation(transaction.explanation)}}</div>
+            </td>
+            <td><span
+                    [ngClass]="{'positive-value': transaction.amount > 0, 'negative-value': transaction.amount < 0}">{{
+                    (transaction.amount/100).toFixed(2) }}</span></td>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+        <tr>
+            <td colspan="3" class="text-center">Нет данных о других операциях</td>
+        </tr>
+    </ng-template>
+</p-table>

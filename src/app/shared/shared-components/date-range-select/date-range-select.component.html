@@ -1,0 +1,12 @@
+<div class="container">
+    <p-button *ngIf="initRangeDates == null" styleClass="p-button-help" routerLink="/">Home</p-button>
+    <div class="card flex justify-content-center">
+        <p-calendar [firstDayOfWeek]="1" [(ngModel)]="rangeDates" selectionMode="range" [readonlyInput]="true"
+            [showIcon]="true" placeholder="Даты для отчета" [showOtherMonths]="true" [selectOtherMonths]="true"
+            [showButtonBar]="true"></p-calendar>
+    </div>
+    <p-button label="Получить отчеты" (click)="getReports()" [disabled]="rangeDates==null"></p-button>
+</div>
+<div *ngIf="rangeDates" class="container">
+    <strong>Период: {{ rangeDates.map(toLocale).join(" - ") }}</strong>
+</div>

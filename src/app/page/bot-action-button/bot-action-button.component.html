@@ -1,0 +1,9 @@
+<div class="btns" *ngIf="status != null">
+    <div><p-button *ngIf="status !== botStatuses.Started && status !== botStatuses.NeedCreate" icon="pi pi-play"
+            (click)="startBot()"></p-button></div>
+    <div class="btns"><p-button styleClass="p-button-danger" *ngIf="status === botStatuses.Started" icon="pi pi-pause"
+            (click)="stopBot()"></p-button>
+        <p-button styleClass="p-button-danger" *ngIf="status === botStatuses.Started" icon="pi pi-stop-circle"
+            (click)="fullStopBot()"></p-button>
+    </div>
+</div>

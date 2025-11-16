@@ -1,0 +1,415 @@
+.commission-explanation {
+  white-space: pre-wrap;
+  font-size: 0.9em;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  overflow-y: auto;
+}
+
+/* Убираем стрелочки для всех number инпутов */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+}
+
+.money-input {
+  width: 85px;
+  margin-right: 4px;
+}
+
+.mb-3 {
+  margin-bottom: 1rem;
+}
+
+.fix-text-clipping ::ng-deep {
+  .p-datatable-tbody > tr > td,
+  .p-datatable-thead > tr > th {
+    padding: 1rem !important;
+    line-height: 1.6 !important;
+    min-height: 3rem !important;
+    vertical-align: middle !important;
+  }
+
+  .p-datatable-wrapper {
+    overflow: visible !important;
+  }
+
+  .p-datatable-table {
+    border-spacing: 0 2px !important;
+    border-collapse: separate !important;
+  }
+
+  // Стили для ячейки с реферальным балансом и кнопкой деталей
+  .ref-balance-cell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+
+    .balance-amount {
+      font-weight: 500;
+      flex-grow: 1;
+    }
+
+    .details-btn {
+      flex-shrink: 0;
+      min-width: auto;
+      padding: 0.25rem 0.5rem;
+
+      &:hover {
+        background-color: #6c757d !important;
+        border-color: #6c757d !important;
+      }
+    }
+  }
+}
+
+:host ::ng-deep {
+  // Общие стили для диалогов
+  .top-up-dialog,
+  .message-dialog {
+    .p-dialog-header {
+      padding: 1rem 1.5rem;
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .p-dialog-content {
+      padding: 0 1.5rem;
+    }
+
+    .p-dialog-footer {
+      border-top: 1px solid #f0f0f0;
+      padding: 1rem 1.5rem;
+    }
+
+    .p-button-primary {
+      background-color: #4dabf7;
+      border-color: #4dabf7;
+
+      &:hover {
+        background-color: #339af0;
+        border-color: #339af0;
+      }
+    }
+
+    .p-inputtext,
+    .p-inputtextarea {
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+  }
+
+  .top-up-dialog .current-balance {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+
+    .balance-label {
+      font-weight: 500;
+      color: #495057;
+    }
+
+    .balance-value {
+      font-weight: 600;
+      color: #212529;
+      font-size: 1.1rem;
+    }
+  }
+
+  .message-dialog {
+    .user-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0.75rem;
+      background-color: #e3f2fd;
+      border-radius: 4px;
+      border: 1px solid #bbdefb;
+
+      .user-label {
+        font-weight: 500;
+        color: #1976d2;
+      }
+
+      .user-value {
+        font-weight: 600;
+        color: #0d47a1;
+      }
+    }
+
+    .p-inputtextarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+  }
+
+  // TabView стили
+  .p-tabview {
+    .p-tabview-nav {
+      border-color: #dee2e6;
+
+      li .p-tabview-nav-link {
+        padding: 0.75rem 1.25rem;
+        font-weight: 500;
+        border-color: #dee2e6;
+
+        &:hover {
+          background-color: #f8f9fa;
+        }
+      }
+
+      li.p-highlight .p-tabview-nav-link {
+        background-color: #fff;
+        border-color: #dee2e6;
+        border-bottom-color: #fff;
+        color: #4dabf7;
+      }
+    }
+
+    .p-tabview-panels {
+      padding: 1.25rem 0;
+    }
+  }
+
+  // Стили таблиц
+  .p-tabview-panels .p-datatable {
+    &.p-datatable-striped .p-datatable-tbody > tr.p-row-odd {
+      background-color: #a6a3a3;
+    }
+
+    .p-datatable-thead > tr > th,
+    .p-datatable-tbody > tr > td,
+    .p-datatable-tfoot > tr > td {
+      padding: 0.75rem 1rem;
+      text-align: center;
+
+      &:first-child {
+        text-align: left;
+      }
+    }
+
+    .p-datatable-thead > tr > th,
+    .p-datatable-tfoot > tr > td {
+      background-color: #f8f9fa;
+      white-space: nowrap;
+    }
+
+    .p-datatable-thead > tr:first-child > th[colspan] {
+      border-bottom: none;
+      background-color: #d0d4d9;
+    }
+
+    .p-datatable-thead > tr:nth-child(2) > th {
+      background-color: #e9ecef;
+      border-top: none;
+    }
+
+    .p-datatable-tfoot > tr > td {
+      font-weight: 600;
+      border-top: 2px solid #dee2e6;
+    }
+
+    .positive-value {
+      color: #28a745;
+    }
+
+    .negative-value {
+      color: #dc3545;
+    }
+  }
+
+  // Стили для диалога детальной информации о кошельке
+  .wallet-details-dialog {
+    .p-dialog-header {
+      padding: 1rem 1.5rem;
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .p-dialog-content {
+      padding: 1.5rem;
+    }
+
+    .wallet-details-content {
+      .user-info {
+        background-color: #e3f2fd;
+        border-radius: 6px;
+        padding: 1rem;
+        border: 1px solid #bbdefb;
+
+        h4 {
+          margin-bottom: 0.5rem;
+          color: #1976d2;
+        }
+
+        .user-details p {
+          margin: 0.25rem 0;
+          color: #0d47a1;
+        }
+      }
+
+      .expected-payments {
+        h4 {
+          color: #495057;
+          margin-bottom: 1rem;
+        }
+
+        .no-data {
+          text-align: center;
+          padding: 2rem;
+          color: #6c757d;
+          font-style: italic;
+        }
+      }
+    }
+  }
+
+  // Стили для диалога отчетов пользователя
+  .reports-dialog {
+    .p-dialog-header {
+      padding: 1rem 1.5rem;
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .p-dialog-content {
+      padding: 1.5rem;
+      max-height: calc(80vh - 120px);
+      overflow-y: auto;
+    }
+
+    .reports-content {
+      .report-text-section {
+        h4 {
+          color: #495057;
+          margin-bottom: 1rem;
+          font-size: 1.1rem;
+        }
+
+        .report-text-container {
+          background-color: #f9f9f9;
+          border: 1px solid #e0e0e0;
+          border-radius: 6px;
+          padding: 1rem;
+          font-family: "Courier New", Courier, monospace;
+          font-size: 0.9rem;
+          line-height: 1.4;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          max-height: 400px;
+          overflow-y: auto;
+
+          // Улучшенная читаемость
+          &:empty::before {
+            content: "Отчет пуст";
+            color: #6c757d;
+            font-style: italic;
+          }
+        }
+      }
+
+      .report-pdf-section {
+        h4 {
+          color: #495057;
+          margin-bottom: 1rem;
+          font-size: 1.1rem;
+        }
+
+        .pdf-actions {
+          display: flex;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+
+          .p-button {
+            min-width: 140px;
+          }
+        }
+      }
+
+      .no-pdf-section {
+        padding: 1rem;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        border-radius: 6px;
+        color: #721c24;
+        text-align: center;
+        font-style: italic;
+      }
+    }
+
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 200px;
+
+      .pi-spinner {
+        color: #4dabf7;
+        margin-bottom: 1rem;
+      }
+
+      p {
+        color: #6c757d;
+        font-size: 1rem;
+        margin: 0;
+      }
+    }
+
+    .p-dialog-footer {
+      border-top: 1px solid #dee2e6;
+      padding: 1rem 1.5rem;
+      background-color: #f8f9fa;
+    }
+  }
+
+  // Стили для статусов платежей
+  .payment-status {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+
+    &.status-paid {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    &.status-unpaid {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  }
+}
+
+// Глобальные стили для подсветки положительных и отрицательных значений
+.positive-value {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.negative-value {
+  color: #dc3545;
+  font-weight: 600;
+}

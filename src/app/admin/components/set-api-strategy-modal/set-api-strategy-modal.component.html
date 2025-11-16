@@ -1,0 +1,21 @@
+<div class="set-api-strategy-modal">
+    <div class="field">
+        <label for="strategy">Выберите стратегию:</label>
+        <p-dropdown id="strategy" [options]="(botStrategies$ | async) || []" [(ngModel)]="selectedStrategyId"
+            optionLabel="name" optionValue="strategyId" placeholder="Выберите стратегию" [filter]="true"
+            filterBy="name,nameEn" [appendTo]="'body'" [styleClass]="'strategy-dropdown'">
+            <ng-template let-strategy pTemplate="item">
+                <div class="strategy-item">
+                    <div class="strategy-name">{{ strategy.name }}</div>
+                    <div class="strategy-description">{{ strategy.description }}</div>
+                </div>
+            </ng-template>
+        </p-dropdown>
+    </div>
+
+    <div class="modal-actions">
+        <p-button label="Отмена" styleClass="p-button-secondary" (click)="close()" [disabled]="isLoading"></p-button>
+        <p-button label="Сохранить" styleClass="p-button-primary" (click)="onSave()"
+            [disabled]="!selectedStrategyId || isLoading" [loading]="isLoading"></p-button>
+    </div>
+</div>

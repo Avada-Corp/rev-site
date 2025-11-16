@@ -1,0 +1,339 @@
+<div class="users-container">
+    <div class="users-header">
+        <h2>Управление пользователями</h2>
+        <div class="header-controls">
+            <div class="search-container">
+                <span class="p-input-icon-left">
+                    <i class="pi pi-search"></i>
+                    <input type="text" pInputText placeholder="Поиск по email, username или рефералу..."
+                        [formControl]="searchControl" class="search-input" />
+                </span>
+            </div>
+            <div class="settings-container" *ngIf="isSuperAdmin">
+                <div class="freeze-settings">
+                    <label>Срок заморозки по умолчанию (дней):</label>
+                    <input type="number" pInputText [(ngModel)]="defaultFreezePeriod" placeholder="Не задано"
+                        class="freeze-input" min="1" max="365">
+                    <p-button icon="pi pi-save" severity="success" size="small" pTooltip="Сохранить настройку"
+                        (click)="updateDefaultFreezePeriod()" class="save-btn">
+                    </p-button>
+                </div>
+            </div>
+            <div class="selection-controls" *ngIf="getSelectedUsersCount() > 0">
+                <p-button icon="pi pi-send" [label]="'Отправить (' + getSelectedUsersCount() + ')'" severity="primary"
+                    size="small" (click)="openBulkMessageDialog()"
+                    pTooltip="Отправить сообщение выбранным пользователям" styleClass="send-all-btn">
+                </p-button>
+            </div>
+            <p-button icon="pi pi-refresh" label="Обновить" (click)="refresh()" [loading]="loading" class="refresh-btn">
+            </p-button>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <p-table [value]="filteredUsers" [loading]="loading" [paginator]="true" [rows]="rows"
+            [totalRecords]="filteredUsers.length" [first]="first" responsiveLayout="scroll" [sortMode]="'single'"
+            (onSort)="onSort($event)" (onPage)="onPageChange($event)" styleClass="p-datatable-striped">
+
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="width: 50px;">
+                        <p-checkbox [binary]="true" [ngModel]="areAllPageUsersSelected()"
+                            (ngModelChange)="onSelectAllCheckboxChange($event)">
+                        </p-checkbox>
+                    </th>
+                    <th pSortableColumn="email">
+                        Email
+                        <p-sortIcon field="email"></p-sortIcon>
+                    </th>
+                    <th pSortableColumn="username">
+                        Username
+                        <p-sortIcon field="username"></p-sortIcon>
+                    </th>
+                    <!-- <th pSortableColumn="isConnected">
+                        Статус
+                        <p-sortIcon field="isConnected"></p-sortIcon>
+                    </th> -->
+                    <th pSortableColumn="totalBalance">
+                        Общий баланс
+                        <p-sortIcon field="totalBalance"></p-sortIcon>
+                    </th>
+                    <th pSortableColumn="parentRef">
+                        Реферал
+                        <p-sortIcon field="parentRef"></p-sortIcon>
+                    </th>
+                    <th pSortableColumn="regDate">
+                        Дата регистрации
+                        <p-sortIcon field="regDate"></p-sortIcon>
+                    </th>
+                    <th *ngIf="isSuperAdmin" pSortableColumn="userRole">
+                        Роль
+                        <p-sortIcon field="userRole"></p-sortIcon>
+                    </th>
+                    <th>Комиссия</th>
+                    <th>Реферальные %</th>
+                    <th>Срок заморозки</th>
+                    <th>Кредит</th>
+                    <th>Тип</th>
+                    <th>Действия</th>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-user>
+                <tr>
+                    <td>
+                        <p-checkbox [binary]="true" [ngModel]="isUserSelected(user)"
+                            (ngModelChange)="toggleUserSelection(user)">
+                        </p-checkbox>
+                    </td>
+                    <td>
+                        <span class="user-email">{{ user.email }}</span>
+                    </td>
+                    <td>
+                        <span class="user-username">{{ user.username || '-' }}</span>
+                    </td>
+                    <!-- <td>
+                        <div class="status-cell">
+                            <i [class]="getStatusIcon(user.hasApiKeys)" [ngClass]="getStatusClass(user.hasApiKeys)">
+                            </i>
+                            <span [ngClass]="getStatusClass(user.hasApiKeys)">
+                                {{ user.hasApiKeys ? 'API подключены' : 'API не настроены' }}
+                            </span>
+                        </div>
+                    </td> -->
+                    <td>
+                        <span class="balance-value" *ngIf="user.hasApiKeys && user.totalBalance !== null">
+                            {{ user.totalBalance | currency:'USD':'symbol':'1.2-2' }}
+                        </span>
+                        <span *ngIf="!user.hasApiKeys || user.totalBalance === null" class="text-gray-500">
+                            -
+                        </span>
+                    </td>
+                    <td>
+                        <span class="referral-info">
+                            {{ user.parentRef || '-' }}
+                            <p-button icon="pi pi-pencil" size="small" styleClass="p-button-text p-button-rounded ml-1"
+                                pTooltip="Изменить рефовода" (click)="editParentRef(user)"></p-button>
+                        </span>
+                    </td>
+                    <td>
+                        <span class="reg-date-info">{{ user.regDate ? formatDate(user.regDate) : '-' }}</span>
+                    </td>
+                    <td *ngIf="isSuperAdmin">
+                        <p-dropdown [options]="userRoles" [(ngModel)]="user.userRole"
+                            (onChange)="changeUserRole(user, $event.value)" [style]="{ width: '8rem' }"></p-dropdown>
+                    </td>
+                    <td>
+                        <span class="commission-info">{{ getUserCommission(user) }}</span>
+                    </td>
+                    <td>
+                        <span class="ref-percent-info">{{ getRefPercent(user) }}</span>
+                    </td>
+                    <td>
+                        <span class="freeze-period-info">
+                            {{ user.freezePeriod ? user.freezePeriod + ' дней' : 'Не задан' }}
+                            <p-button icon="pi pi-pencil" size="small" styleClass="p-button-text p-button-rounded ml-1"
+                                pTooltip="Изменить срок заморозки" (click)="editFreezePeriod(user)"></p-button>
+                        </span>
+                    </td>
+                    <td>
+                        <span class="creditor-status-info">
+                            <p-badge [value]="user.canWorkOnCredit ? 'Да' : 'Нет'"
+                                [severity]="user.canWorkOnCredit ? 'success' : 'danger'">
+                            </p-badge>
+                            <p-button icon="pi pi-pencil" size="small" styleClass="p-button-text p-button-rounded ml-1"
+                                pTooltip="Изменить статус кредитора" (click)="editCreditorStatus(user)"></p-button>
+                        </span>
+                    </td>
+                    <td>
+                        <div class="user-type-cell">
+                            <p-badge [value]="user.isEmpty ? 'Пустой' : 'Активный'"
+                                [severity]="user.isEmpty ? 'warning' : 'success'">
+                            </p-badge>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="actions-cell">
+                            <p-button icon="pi pi-send" severity="help" size="small" pTooltip="Отправить сообщение"
+                                (click)="openMessageDialog(user.email || user.username || '')"
+                                [disabled]="(!user.email && !user.username) ">
+                            </p-button>
+
+                            <p-button icon="pi pi-percentage" severity="secondary" size="small"
+                                pTooltip="Установить комиссию пользователя" (click)="setUserCommission(user)"
+                                class="ml-1">
+                            </p-button>
+
+                            <p-button icon="pi pi-users" severity="info" size="small"
+                                pTooltip="Установить реферальные проценты" (click)="setRefPercent(user)" class="ml-1">
+                            </p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="12" class="text-center">
+                        <div class="empty-state">
+                            <i class="pi pi-users" style="font-size: 3rem; color: #6c757d;"></i>
+                            <p>Пользователи не найдены</p>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>
+
+<!-- Диалог отправки сообщения -->
+<p-dialog header="Отправить сообщение пользователю" [(visible)]="messageDialogVisible"
+    [style]="{width: '50vw', minWidth: '400px'}" [modal]="true" [closable]="!sendingMessage">
+
+    <div class="message-dialog-content">
+        <div class="field">
+            <label for="userEmail">Получатель:</label>
+            <input type="text" id="userEmail" pInputText [value]="selectedUserEmail" readonly class="w-full" />
+        </div>
+
+        <div class="field">
+            <label for="messageText">Сообщение:</label>
+            <textarea id="messageText" pInputTextarea [(ngModel)]="messageText" [rows]="4"
+                placeholder="Введите текст сообщения..." class="w-full" [disabled]="sendingMessage">
+      </textarea>
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <div class="dialog-footer">
+            <p-button label="Отмена" severity="secondary" (click)="messageDialogVisible = false"
+                [disabled]="sendingMessage">
+            </p-button>
+            <p-button label="Отправить" icon="pi pi-send" (click)="sendMessage()" [loading]="sendingMessage"
+                [disabled]="!messageText.trim()">
+            </p-button>
+        </div>
+    </ng-template>
+</p-dialog>
+
+<!-- Диалог изменения родителя (parentRef) -->
+<p-dialog header="Изменить рефовода для {{currentEditingUser?.username || currentEditingUser?.email}}"
+    [(visible)]="isParentRefDialogVisible"
+    [style]="{width: '50vw', height: '40vh', display: 'flex', justifyContent: 'center'}" [modal]="true"
+    class="parent-ref-dialog">
+    <div class="flex flex-column justify-content-between h-full" style="gap: 1rem;">
+        <p-dropdown [options]="controlApiService.allUsernames" [(ngModel)]="selectedParentRef"
+            placeholder="Выберите нового рефовода" [style]="{'width':'100%'}">
+        </p-dropdown>
+        <div class="flex justify-content-between">
+            <p-button label="Отмена" styleClass="p-button-secondary" (click)="closeParentRefDialog()"></p-button>
+            <p-button label="Сохранить" styleClass="p-button-primary" (click)="onParentRefChange()"
+                [disabled]="!selectedParentRef"></p-button>
+        </div>
+    </div>
+</p-dialog>
+
+<!-- Диалоги для редактирования комиссий и рефералов -->
+<p-dialog header="Комиссия пользователя" [(visible)]="isCommissionSet" [style]="{width: '50vw'}">
+    <app-update-commission *ngIf="userCommission != null" (closeFormEvent)="closeApiForm()"
+        [userCommission]="userCommission"></app-update-commission>
+</p-dialog>
+
+<p-dialog header="Реферальные проценты" [(visible)]="isRefSet" [style]="{width: '50vw'}">
+    <app-update-ref *ngIf="refInfo?.email != null" (closeFormEvent)="closeApiForm()"
+        [refInfo]="refInfo"></app-update-ref>
+</p-dialog>
+
+<!-- Диалог изменения статуса кредитора -->
+<p-dialog header="Изменить статус кредитора для {{currentEditingUser?.username || currentEditingUser?.email}}"
+    [(visible)]="isCreditorDialogVisible"
+    [style]="{width: '50vw', height: '40vh', display: 'flex', justifyContent: 'center'}" [modal]="true"
+    class="creditor-dialog">
+    <div class="flex flex-column justify-content-between h-full" style="gap: 1rem;">
+        <div class="field">
+            <label for="creditorStatus">Статус кредитора:</label>
+            <p-selectButton [options]="creditorOptions" [(ngModel)]="selectedCreditorStatus" [optionLabel]="'label'"
+                [optionValue]="'value'">
+            </p-selectButton>
+            <small class="text-gray-500 mt-2 block">
+                Определяет, может ли пользователь работать в кредит
+            </small>
+        </div>
+        <div class="flex justify-content-between">
+            <p-button label="Отмена" styleClass="p-button-secondary" (click)="closeCreditorDialog()"></p-button>
+            <p-button label="Сохранить" styleClass="p-button-primary" (click)="onCreditorStatusChange()"
+                [disabled]="savingCreditorStatus"></p-button>
+        </div>
+    </div>
+</p-dialog>
+
+<!-- Диалог изменения срока заморозки -->
+<p-dialog header="Изменить срок заморозки для {{currentEditingUser?.username || currentEditingUser?.email}}"
+    [(visible)]="isFreezePeriodDialogVisible"
+    [style]="{width: '50vw', height: '40vh', display: 'flex', justifyContent: 'center'}" [modal]="true"
+    class="freeze-period-dialog">
+    <div class="flex flex-column justify-content-between h-full" style="gap: 1rem;">
+        <div class="field">
+            <label for="freezePeriod">Срок заморозки аккаунта (дней):</label>
+            <input type="number" id="freezePeriod" pInputText [(ngModel)]="selectedFreezePeriod"
+                placeholder="Введите количество дней" class="w-full" min="1" max="365">
+            <small class="text-gray-500">Оставьте пустым для снятия заморозки</small>
+        </div>
+        <div class="flex justify-content-between">
+            <p-button label="Отмена" styleClass="p-button-secondary" (click)="closeFreezePeriodDialog()"></p-button>
+            <p-button label="Сохранить" styleClass="p-button-primary" (click)="onFreezePeriodChange()"
+                [disabled]="savingFreezePeriod"></p-button>
+        </div>
+    </div>
+</p-dialog>
+
+<!-- Диалог массовой отправки сообщений -->
+<p-dialog header="Отправить сообщение выбранным пользователям" [(visible)]="bulkMessageDialogVisible"
+    [style]="{width: '50vw', minWidth: '400px'}" [modal]="true" [closable]="!sendingBulkMessage">
+    <div class="message-dialog-content">
+        <div class="field">
+            <label>
+                <span class="clickable-recipients" (click)="openSelectedUsersListDialog()"
+                    pTooltip="Нажмите, чтобы посмотреть список получателей">
+                    Количество получателей: {{ getSelectedUsersCount() }}
+                </span>
+            </label>
+        </div>
+        <div class="field">
+            <label for="bulkMessageText">Сообщение:</label>
+            <textarea id="bulkMessageText" pInputTextarea [(ngModel)]="bulkMessageText" [rows]="6"
+                placeholder="Введите текст сообщения для всех выбранных пользователей..." class="w-full"
+                [disabled]="sendingBulkMessage">
+            </textarea>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <div class="dialog-footer">
+            <p-button label="Отмена" severity="secondary" (click)="closeBulkMessageDialog()"
+                [disabled]="sendingBulkMessage">
+            </p-button>
+            <p-button label="Отправить" icon="pi pi-send" (click)="sendBulkMessage()" [loading]="sendingBulkMessage"
+                [disabled]="!bulkMessageText.trim()">
+            </p-button>
+        </div>
+    </ng-template>
+</p-dialog>
+
+<!-- Диалог списка выбранных пользователей -->
+<p-dialog header="Список получателей ({{ getSelectedUsersCount() }})" [(visible)]="selectedUsersListDialogVisible"
+    [style]="{width: '40vw', minWidth: '500px'}" [modal]="true">
+    <div class="selected-users-list">
+        <div class="users-list-container">
+            <div class="user-item" *ngFor="let user of getSelectedUsersList()">
+                <span class="user-display">{{ user.username || user.email }}</span>
+                <span class="user-email" *ngIf="user.username">{{ user.email }}</span>
+            </div>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <div class="dialog-footer">
+            <p-button label="Закрыть" severity="secondary" (click)="closeSelectedUsersListDialog()">
+            </p-button>
+        </div>
+    </ng-template>
+</p-dialog>

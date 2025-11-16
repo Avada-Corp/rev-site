@@ -1,0 +1,12 @@
+.container {
+  display: flex;
+  justify-content: center;
+  margin: 15px 0;
+  align-items: center;
+}
+.container > p-button {
+  margin-left: 15px;
+}
+.container > div {
+  margin-left: 15px;
+}

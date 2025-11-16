@@ -1,0 +1,187 @@
+<p-card [style]="{ width: '400px' }">
+    <p-accordion [activeIndex]="-1" (onOpen)="onAccordionOpen()">
+        <p-accordionTab header="Бот {{bot.name}} {{bot.isForStart ? '✅':'❌'}}">
+            <div *ngIf="isFormInitialized">
+                <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                    <p-button *ngIf="bot.id" class="deleteBot" icon="pi pi-times"
+                        styleClass="p-button-rounded p-button-danger" (click)="deleteBot()"></p-button>
+                    <div class="flex flex-column gap-2">
+                        <label htmlFor="name">Имя бота *</label>
+                        <input pInputText id="name" autocomplete="nonono" formControlName="name" />
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <label>Алгоритм *</label>
+                        <p-dropdown optionLabel="name" [options]="algo" formControlName="algo"></p-dropdown>
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <label>Пара *</label>
+                        <p-dropdown optionLabel="name" [options]="pair" formControlName="pair"></p-dropdown>
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <div><label for="isAutoDepoCount">Автоподсчет размера депозита</label>
+                            <p-checkbox formControlName="isAutoDepoCount" [binary]="true"
+                                inputId="isAutoDepoCount"></p-checkbox>
+                        </div>
+                        <div><label htmlFor="depo_percent">Депозит (%) *</label>
+                            <input pInputText type="text" id="depo_percent" formControlName="depo_percent" />
+                        </div>
+                        <div><label htmlFor="depo_abs">Депозит USDT *</label>
+                            <input pInputText id="depo_abs" autocomplete="nonono" formControlName="depo_abs" />
+                        </div>
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <label htmlFor="leverage">Плечо *</label>
+                        <input pInputText id="leverage" autocomplete="nonono" formControlName="leverage" />
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <label>Режим позиции *</label>
+                        <p-dropdown optionLabel="name" [options]="positionmode"
+                            formControlName="positionmode"></p-dropdown>
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <label>Перекрытие изменения цены (%) *</label>
+                        <p-dropdown optionLabel="name" [options]="rate_cover" formControlName="rate_cover"></p-dropdown>
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <label>Отступ первого ордера (%) *</label>
+                        <p-dropdown optionLabel="name" [options]="first_order_indent"
+                            formControlName="first_order_indent"></p-dropdown>
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <label>Цена на бирже *</label>
+                        <p-dropdown optionLabel="name" [options]="rate_mode" formControlName="rate_mode"></p-dropdown>
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <label>Сетка ордеров, % мартингейла *</label>
+                        <p-dropdown optionLabel="name" [options]="order_matrix"
+                            formControlName="order_matrix"></p-dropdown>
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <p-checkbox formControlName="part_orders_enabled" [binary]="true"
+                            inputId="part_orders_enabled"></p-checkbox>
+                        <label for="part_orders_enabled">Включить частичное выставление сетки ордеров</label>
+                        <input pInputText id="part_orders_value" autocomplete="nonono"
+                            formControlName="part_orders_value" />
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <label>Профит (%) *</label>
+                        <p-dropdown optionLabel="name" [options]="profit" formControlName="profit"></p-dropdown>
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <label>Подтяжка сетки ордеров (%) *</label>
+                        <p-dropdown optionLabel="name" [options]="cycle_up" formControlName="cycle_up"></p-dropdown>
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <label>Задержка перед отменой сетки ордеров для подтяжки *</label>
+                        <p-dropdown optionLabel="name" [options]="sleep_before_cancel"
+                            formControlName="sleep_before_cancel"></p-dropdown>
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <label>Задержка после отмены сетки ордеров для подтяжки *</label>
+                        <p-dropdown optionLabel="name" [options]="sleep_before_up"
+                            formControlName="sleep_before_up"></p-dropdown>
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <label>Задержка после завершения цикла *</label>
+                        <p-dropdown optionLabel="name" [options]="sleep_after_done"
+                            formControlName="sleep_after_done"></p-dropdown>
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <p-checkbox formControlName="logarithmic_scale_for_orders" [binary]="true"
+                            inputId="logarithmic_scale_for_orders"></p-checkbox>
+                        <label for="logarithmic_scale_for_orders">Логарифмическое распределение цен</label>
+                        <label>Выберите логарифмический коэффициент</label>
+                        <p-dropdown optionLabel="name" [options]="logarithmic_factor"
+                            formControlName="logarithmic_factor"></p-dropdown>
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <label>Автоматически перезапускать бота после выхода с ошибкой</label>
+                        <p-dropdown optionLabel="name" [options]="autorestart"
+                            formControlName="autorestart"></p-dropdown>
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <div>
+                            <label>Включить фильтры для старта бота</label>
+                            <p-checkbox formControlName="start_filters_enabled" [binary]="true"
+                                inputId="start_filters_enabled"></p-checkbox>
+                        </div>
+
+                        <div formArrayName="filters">
+                            <div *ngFor="let filter of filtersArray.controls; let i = index" [formGroupName]="i"
+                                style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <h4 style="margin: 0;">Фильтр #{{i + 1}}</h4>
+                                    <p-button icon="pi pi-times" (click)="removeFilter(i)"
+                                        styleClass="p-button-rounded p-button-danger p-button-sm"></p-button>
+                                </div>
+
+                                <div class="flex flex-column gap-2">
+                                    <label>Тип фильтра *</label>
+                                    <p-dropdown optionLabel="name" [options]="filter_types"
+                                        formControlName="filter_type"></p-dropdown>
+                                </div>
+
+                                <!-- RSI фильтр -->
+                                <div *ngIf="getFilterType(i) === 'rsi'">
+                                    <div class="flex flex-column gap-2">
+                                        <label>Операция *</label>
+                                        <p-dropdown optionLabel="name" [options]="sf__id_op"
+                                            formControlName="operation"></p-dropdown>
+                                    </div>
+                                    <div class="flex flex-column gap-2">
+                                        <label>Значение индикатора*</label>
+                                        <input pInputText autocomplete="nonono" formControlName="value" />
+                                    </div>
+                                    <div class="flex flex-column gap-2">
+                                        <label>Доп. настройки - длина</label>
+                                        <input pInputText autocomplete="nonono" formControlName="data" />
+                                    </div>
+                                </div>
+
+                                <!-- Bollinger Bands фильтры -->
+                                <div *ngIf="getFilterType(i) === 'bb_l' || getFilterType(i) === 'bb_u'">
+                                    <div class="flex flex-column gap-2">
+                                        <label>Период *</label>
+                                        <p-dropdown optionLabel="name" [options]="filter_periods"
+                                            formControlName="period"></p-dropdown>
+                                    </div>
+                                    <div class="flex flex-column gap-2">
+                                        <label>Значение длины (1-144) *</label>
+                                        <input pInputText type="number" min="1" max="144" autocomplete="nonono"
+                                            formControlName="length" />
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-column gap-2">
+                                    <label>Пара *</label>
+                                    <p-dropdown optionLabel="name" [options]="sf__pair"
+                                        formControlName="pair"></p-dropdown>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p-button label="Добавить фильтр" icon="pi pi-plus" (click)="addFilter()"
+                            styleClass="p-button-secondary" [style]="{ 'margin-top': '10px' }"></p-button>
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <label>Таксономия</label>
+                        <mat-form-field>
+                            <mat-label>Tags</mat-label>
+                            <mat-select formControlName="botRefsTags" multiple>
+                                <mat-option *ngFor="let ref of refs" [value]="ref.name">{{ref.name}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <p-checkbox formControlName="isForStart" [binary]="true" inputId="start"></p-checkbox>
+                        <label for="ny">Запускать при создании</label>
+                    </div>
+                    <p-button icon="pi pi-check" type="submit"></p-button>
+                    <p-button icon="pi pi-times" (click)="resetForm()" styleClass="p-button-secondary"
+                        [style]="{ 'margin-left': '.5em' }"></p-button>
+                </form>
+            </div>
+        </p-accordionTab>
+    </p-accordion>
+</p-card>

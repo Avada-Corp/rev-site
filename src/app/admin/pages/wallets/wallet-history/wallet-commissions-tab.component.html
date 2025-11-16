@@ -1,0 +1,65 @@
+<p-table [value]="commissionTableData" styleClass="p-datatable-striped">
+    <ng-template pTemplate="header">
+        <tr>
+            <th rowspan="2">Ключ</th>
+            <th rowspan="2">Период</th>
+            <th colspan="4">Доступный баланс (с учетом unPNL)</th>
+            <th rowspan="2">PNL</th>
+            <th rowspan="2">unPNL</th>
+            <th rowspan="2">Общая прибыль</th>
+            <th rowspan="2">Комиссия</th>
+            <th rowspan="2">Чистая прибыль</th>
+        </tr>
+        <tr>
+            <th>Начало</th>
+            <th>unPNL начало</th>
+            <th>Конец</th>
+            <th>unPNL конец</th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-commission>
+        <tr>
+            <td><span>{{commission.apiName}}</span></td>
+            <td><span>{{ getCommissionPeriod(commission) }}</span></td>
+            <td><span
+                    [ngClass]="{'positive-value': commission.startBalance > 0, 'negative-value': commission.startBalance < 0}">{{
+                    commission.startBalance }}</span></td>
+            <td><span
+                    [ngClass]="{'positive-value': commission.startPnl > 0, 'negative-value': commission.startPnl < 0}">{{
+                    commission.startPnl }}</span></td>
+            <td><span
+                    [ngClass]="{'positive-value': commission.endBalance > 0, 'negative-value': commission.endBalance < 0}">{{
+                    commission.endBalance }}</span></td>
+            <td><span [ngClass]="{'positive-value': commission.endPnl > 0, 'negative-value': commission.endPnl < 0}">{{
+                    commission.endPnl }}</span></td>
+            <td><span [ngClass]="{'positive-value': commission.pnl > 0, 'negative-value': commission.pnl < 0}">{{
+                    commission.pnl }}</span></td>
+            <td><span [ngClass]="{'positive-value': commission.unPnl > 0, 'negative-value': commission.unPnl < 0}">{{
+                    commission.unPnl }}</span></td>
+            <td><span [ngClass]="{'positive-value': commission.earned > 0, 'negative-value': commission.earned < 0}">{{
+                    commission.earned }}</span></td>
+            <td><span [ngClass]="{'positive-value': commission.amount > 0, 'negative-value': commission.amount < 0}">{{
+                    (commission.amount/100).toFixed(2) }}</span></td>
+            <td><span
+                    [ngClass]="{'positive-value': commission.netProfit > 0, 'negative-value': commission.netProfit < 0}">{{
+                    commission.netProfit }}</span></td>
+        </tr>
+    </ng-template>
+    <!-- <ng-template pTemplate="footer" *ngIf="commissionTableData.length > 0">
+        <tr>
+            <td>{{ getMonthName(selectedWalletCommissions) }}</td>
+            <td><span>{{ getInitialBalance() }}</span></td>
+            <td><span>{{ getFinalBalance() }}</span></td>
+            <td><span>{{ getTotalPnl() }}</span></td>
+            <td><span>{{ getTotalUnPnl() }}</span></td>
+            <td><span>{{ getTotalEarned() }}</span></td>
+            <td><span>{{ getTotalCommission() }}</span></td>
+            <td><span>{{ getTotalNetProfit() }}</span></td>
+        </tr>
+    </ng-template> -->
+    <ng-template pTemplate="emptymessage">
+        <tr>
+            <td colspan="11" class="text-center">Нет данных о комиссиях за период</td>
+        </tr>
+    </ng-template>
+</p-table>

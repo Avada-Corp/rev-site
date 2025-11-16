@@ -1,0 +1,40 @@
+<p-dialog [header]="modalTitle" [(visible)]="visible" [style]="{width: '80vw'}" [modal]="true"
+    (onHide)="onVisibleChange(false)">
+    <p-tabView>
+        <!-- Вкладка с начисленными комиссиями -->
+        <p-tabPanel header="Комиссии за период">
+            <app-wallet-commissions-tab [selectedWalletCommissions]="selectedWalletCommissions">
+            </app-wallet-commissions-tab>
+        </p-tabPanel>
+
+        <!-- Вкладка с ручными пополнениями -->
+        <p-tabPanel header="Другие операции">
+            <app-wallet-manual-transactions-tab [selectedWalletManualTransactions]="selectedWalletManualTransactions">
+            </app-wallet-manual-transactions-tab>
+        </p-tabPanel>
+
+        <!-- Вкладка с реферальными платежами -->
+        <p-tabPanel header="Реферальные платежи">
+            <app-wallet-referral-transactions-tab
+                [selectedWalletReferralTransactions]="selectedWalletReferralTransactions">
+            </app-wallet-referral-transactions-tab>
+        </p-tabPanel>
+
+        <!-- Вкладка с партнерскими комиссиями -->
+        <p-tabPanel header="Партнерские комиссии">
+            <app-wallet-commissions-tab [selectedWalletCommissions]="selectedWalletPartnerCommissions">
+            </app-wallet-commissions-tab>
+        </p-tabPanel>
+
+        <!-- Новая вкладка со всеми транзакциями -->
+        <p-tabPanel header="Все транзакции">
+            <app-wallet-all-transactions-tab [selectedWalletCommissions]="selectedWalletCommissions"
+                [selectedWalletManualTransactions]="selectedWalletManualTransactions"
+                [selectedWalletReferralTransactions]="selectedWalletReferralTransactions"
+                [selectedWalletReferralWithdrawals]="selectedWalletReferralWithdrawals"
+                [selectedWalletPartnerCommissions]="selectedWalletPartnerCommissions"
+                [selectedWalletCryptoTransactions]="selectedWalletCryptoTransactions">
+            </app-wallet-all-transactions-tab>
+        </p-tabPanel>
+    </p-tabView>
+</p-dialog>

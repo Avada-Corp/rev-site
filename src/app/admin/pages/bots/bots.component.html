@@ -1,0 +1,56 @@
+<div class="cards">
+    <div class="strategy-header"
+        style="width: 100%; margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px; padding: 15px; background: #f8f9fa; border-radius: 5px; border: 1px solid #e9ecef;">
+        <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label style="font-weight: 600; color: #495057;">Стратегия:</label>
+                <p-dropdown [options]="botStrategies" optionLabel="name" optionValue="strategyId"
+                    placeholder="Выберите стратегию" [(ngModel)]="selectedStrategyId"
+                    (onChange)="onStrategyChange($event.value)" [style]="{'width': '200px'}">
+                </p-dropdown>
+            </div>
+            <div *ngIf="selectedStrategyDescription"
+                style="flex: 1; padding: 8px 12px; background: white; border-radius: 4px; border: 1px solid #dee2e6; font-size: 14px; color: #6c757d;">
+                <strong style="color: #495057;">Описание:</strong> {{ selectedStrategyDescription }}
+            </div>
+        </div>
+        <div *ngIf="selectedStrategyId && getAvailableStrategiesForCopy().length > 0"
+            style="display: flex; align-items: center; gap: 10px; padding: 10px; background: white; border-radius: 4px; border: 1px solid #dee2e6;">
+            <label style="font-weight: 600; color: #495057;">Скопировать с:</label>
+            <p-dropdown [options]="getAvailableStrategiesForCopy()" optionLabel="name" optionValue="strategyId"
+                placeholder="Выберите стратегию" [(ngModel)]="copyFromStrategyId" [style]="{'width': '200px'}">
+            </p-dropdown>
+            <p-button label="Скопировать" icon="pi pi-copy" (click)="copyStrategySettings()"
+                [disabled]="!copyFromStrategyId" styleClass="p-button-success p-button-sm"></p-button>
+        </div>
+    </div>
+
+    <div class="bots-form">
+        <p-card [style]="{ width: '500px' }">
+            <div cdkDropList *ngIf="modifiedLongBots.length > 0 && order_matrix.length > 1"
+                class="example-list bots-all" (cdkDropListDropped)="drop($event, true)">
+                <div class="bot example-box" *ngFor="let bot of modifiedLongBots; trackBy: trackByBotId">
+                    <app-bot-card cdkDrag [bot]="bot" [email]="email" [order_matrix]="order_matrix" [refs]="botRefsTags"
+                        [strategies]="botStrategies"></app-bot-card>
+                </div>
+            </div>
+        </p-card>
+        <p-card [style]="{ width: '500px' }">
+            <div cdkDropList *ngIf="modifiedShortBots.length > 0 && order_matrix.length > 1"
+                class="example-list bots-all" (cdkDropListDropped)="drop($event, false)">
+                <div class="bot example-box" *ngFor="let bot of modifiedShortBots; trackBy: trackByBotId">
+                    <app-bot-card cdkDrag [bot]="bot" [email]="email" [order_matrix]="order_matrix" [refs]="botRefsTags"
+                        [strategies]="botStrategies"></app-bot-card>
+                </div>
+            </div>
+        </p-card>
+        <p-button class="addBot" icon="pi pi-plus" *ngIf="modifiedCandidateBots == null && selectedStrategyId"
+            styleClass="p-button-warning" (click)="addBot()"></p-button>
+        <app-bot-card *ngIf="modifiedCandidateBots != null" [bot]="modifiedCandidateBots" [email]="email"
+            [order_matrix]="order_matrix" [refs]="botRefsTags" [strategies]="botStrategies"></app-bot-card>
+        <div>
+            <p-button class="saveBotOrder" styleClass="p-button-success" (click)="saveBotOrder()"
+                *ngIf="isSaveOrder">Save new bot order</p-button>
+        </div>
+    </div>
+</div>

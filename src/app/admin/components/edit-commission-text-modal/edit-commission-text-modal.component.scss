@@ -1,0 +1,88 @@
+.modal-content {
+  .variables-section {
+    margin-bottom: 20px;
+
+    h4 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .variables-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+
+      ::ng-deep .p-button {
+        width: 100%;
+        justify-content: flex-start;
+        font-size: 12px;
+      }
+    }
+
+    .help-text {
+      color: #666;
+      font-size: 12px;
+      display: block;
+      margin-top: 5px;
+    }
+  }
+
+  .language-section {
+    margin-bottom: 20px;
+
+    h4 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .language-dropdown {
+      width: 200px;
+
+      ::ng-deep {
+        .p-dropdown {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  .text-section {
+    h4 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .textarea-container {
+      position: relative;
+      width: 100%;
+
+      .commission-textarea {
+        width: 100%;
+        min-height: 300px;
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        line-height: 1.4;
+        outline: none;
+        resize: vertical;
+        background: white;
+
+        &:focus {
+          border-color: #007bff;
+          box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        &::placeholder {
+          color: #999;
+          font-style: italic;
+        }
+      }
+    }
+  }
+}

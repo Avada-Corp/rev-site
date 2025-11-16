@@ -1,0 +1,84 @@
+<app-date-range-select [rangeDates]="getLastClosedWeekDates()" [dispatchFunc]="getReports"
+  [email]="null"></app-date-range-select>
+<p-table class="report-table" [value]="fullReports" dataKey="username" rowGroupMode="subheader" groupRowsBy="username"
+  [scrollable]="true" scrollHeight="700px" [tableStyle]="{'min-width': '70rem'}">
+  <ng-template pTemplate="header">
+    <!-- <tr>
+      <th rowspan="2">Api name</th>
+      <th colspan="1">Начало периода</th>
+      <th colspan="1">Конец периода</th>
+    </tr> -->
+    <tr>
+      <th>Api name</th>
+      <th>Начало периода unPNL</th>
+      <th>Конец периода unPNL</th>
+      <th>Реализованный пнл</th>
+      <th>Итого</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="groupheader" let-report let-rowIndex="rowIndex" let-expanded="expanded">
+    <tr>
+      <td colspan="5">
+        <button type="button" pButton pRipple [pRowToggler]="report"
+          class="p-button-text p-button-rounded p-button-plain mr-2"
+          [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></button>
+        <span class="font-bold ml-2">{{report.username}}</span>
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="groupfooter" let-report>
+    <tr class="p-rowgroup-footer lighted">
+      <td>Итого <b>{{report.username}}</b></td>
+      <td>Общий пнл: {{ getTotalVal(report, "totalDaily").toFixed(2) }}</td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="rowexpansion" let-report>
+    <tr>
+      <td (click)="onOpenControlBtns(report)" class="apiName">{{ report.apiName }}</td>
+      <td>{{ toFixed(report.pnlStart) }}</td>
+      <td>{{ toFixed(report.pnl) }}</td>
+      <td>{{ report.pnlDaily?.toFixed(2) ?? "" }}</td>
+      <td>{{ report.totalDaily?.toFixed(2) ?? "" }}</td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="summary">
+    <tr *ngIf="reports.length > 0" class="footerRow">
+      <td>Общий пнл по отчетам: {{ getAllTotalVal("totalDaily").toFixed(2) }}</td>
+    </tr>
+  </ng-template>
+</p-table>
+<p-dialog header="Control Btns" [(visible)]="isControlBtns" (onHide)="onHideControlBtns()" [modal]="true"
+  [style]="{width: '50vw'}">
+  <div *ngIf="curReport != null" class="controlBtns">
+    <div class="dataBtns">
+      <p-button class="addBot" icon="pi pi-database" styleClass="p-button-warning"
+        (click)="controlApiService.actualizeBotsInfo(getApiInfoFromReport(curReport))"></p-button>
+      <p-button class="addBot" icon="pi pi-sliders-v" styleClass="p-button-warning"
+        (click)="controlApiService.actualizeBotsNotStartInfo(getApiInfoFromReport(curReport))"></p-button>
+      <p-button class="addBot" icon="pi pi-sync" styleClass="p-button-success"
+        (click)="controlApiService.updateBotsInfo(getApiInfoFromReport(curReport))"></p-button>
+    </div>
+    <div class="mngBots">
+      <p-button class="addBot" icon="pi pi-pencil" styleClass="p-button-danger" (click)="isEditForm = true">
+      </p-button>
+      <p-button class="addBot" icon="pi pi-times" styleClass="p-button-danger"
+        (click)="controlApiService.deleteApi(getApiInfoFromReport(curReport))">
+      </p-button>
+      <p-button class="addBot" icon="pi pi-play" styleClass="p-button-success"
+        (click)="controlApiService.startApi(getApiInfoFromReport(curReport))">
+      </p-button>
+      <p-button class="addBot" icon="pi pi-pause" styleClass="p-button-danger"
+        (click)="controlApiService.stopApi(getApiInfoFromReport(curReport))">
+      </p-button>
+      <p-button class="addBot" icon="pi pi-circle" styleClass="p-button-danger"
+        (click)="controlApiService.fullStopApi(getApiInfoFromReport(curReport))">
+      </p-button>
+    </div>
+  </div>
+  <app-refferal-grid *ngIf="this.curReport && this.curReport.tgAccount"
+    [accountId]="this.curReport.tgAccount"></app-refferal-grid>
+</p-dialog>
+<p-dialog header="Edit Api" [(visible)]="isEditForm" [style]="{width: '50vw'}">
+  <app-edit-user-api *ngIf="curReport != null" (closeFormEvent)="isEditForm = false"
+    [api]="getApiInfoFromReport(curReport)"></app-edit-user-api>
+</p-dialog>

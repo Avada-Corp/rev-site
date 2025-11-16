@@ -1,0 +1,71 @@
+.set-api-strategy-modal {
+  padding: 1rem;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    ::ng-deep .p-dropdown {
+      width: 100%;
+      max-width: 100%;
+
+      .p-dropdown-label {
+        width: 100%;
+      }
+    }
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 1rem;
+  }
+}
+
+::ng-deep .strategy-dropdown {
+  .p-dropdown-panel {
+    max-width: 600px;
+
+    .p-dropdown-items {
+      .p-dropdown-item {
+        white-space: normal;
+        padding: 0.75rem 1rem;
+      }
+    }
+  }
+}
+
+.strategy-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-width: 100%;
+
+  .strategy-name {
+    font-weight: 600;
+    font-size: 1rem;
+    white-space: normal;
+    word-wrap: break-word;
+  }
+
+  .strategy-description {
+    font-size: 0.875rem;
+    color: #666;
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.4;
+  }
+}

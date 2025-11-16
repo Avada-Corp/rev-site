@@ -1,0 +1,246 @@
+<div class="promocodes-container">
+    <div class="header">
+        <h2>Управление промокодами</h2>
+        <button type="button" class="btn btn-primary" (click)="toggleGenerateForm()">
+            {{ showGenerateForm ? 'Отмена' : 'Создать промокоды' }}
+        </button>
+    </div>
+
+    <!-- Форма генерации промокодов -->
+    <div class="generate-form-container" *ngIf="showGenerateForm">
+        <div class="card">
+            <div class="card-header">
+                <h3>Генерация промокодов</h3>
+            </div>
+            <div class="card-body">
+                <form [formGroup]="generateForm" (ngSubmit)="onGeneratePromocodes()">
+                    <!-- Поле персонального промокода -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="personalCode">Персональный промокод</label>
+                                <input type="text" id="personalCode" class="form-control" formControlName="personalCode"
+                                    placeholder="Введите код для персонального многоразового промокода (необязательно)">
+                                <div class="invalid-feedback"
+                                    *ngIf="generateForm.get('personalCode')?.touched && generateForm.get('personalCode')?.errors">
+                                    Используйте только буквы, цифры, дефисы и подчеркивания
+                                </div>
+                                <small class="form-text text-muted">
+                                    Если указан персональный код, будет создан 1 многоразовый промокод с указанным кодом
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="amount">Сумма *</label>
+                                <input type="number" id="amount" class="form-control" formControlName="amount"
+                                    step="0.01" min="0.01" placeholder="Введите сумму" #amountInput
+                                    (blur)="formatMoneyInput(amountInput)">
+                                <div class="invalid-feedback"
+                                    *ngIf="generateForm.get('amount')?.touched && generateForm.get('amount')?.errors">
+                                    Введите корректную сумму
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="count">Количество *</label>
+                                <input type="number" id="count" class="form-control" formControlName="count" min="1"
+                                    max="100" placeholder="Введите количество">
+                                <div class="invalid-feedback"
+                                    *ngIf="generateForm.get('count')?.touched && generateForm.get('count')?.errors">
+                                    Введите количество от 1 до 100
+                                </div>
+                                <small class="form-text text-muted" *ngIf="generateForm.get('personalCode')?.value">
+                                    Для персонального промокода количество автоматически устанавливается в 1
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <input type="checkbox" id="isReusable" class="form-check-input"
+                                        formControlName="isReusable">
+                                    <label class="form-check-label" for="isReusable">
+                                        Многоразовый промокод
+                                    </label>
+                                </div>
+                                <small class="form-text text-muted" *ngIf="generateForm.get('personalCode')?.value">
+                                    Персональный промокод автоматически является многоразовым
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="usageLimit">Лимит использований</label>
+                                <input type="number" id="usageLimit" class="form-control" formControlName="usageLimit"
+                                    min="1" placeholder="Без лимита">
+                                <small class="form-text text-muted">
+                                    Доступно только для многоразовых промокодов
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="expirationDate">Срок действия</label>
+                                <input type="date" id="expirationDate" class="form-control"
+                                    formControlName="expirationDate">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="referralUser">Привязка к рефералу</label>
+                                <ng-container *ngIf="usersLoaded; else loadingUsers">
+                                    <p-dropdown formControlName="referralUser" [options]="(usernames$ | async) || []"
+                                        optionLabel="email" optionValue="email" placeholder="Выберите пользователя"
+                                        [showClear]="true" [filter]="true" filterBy="email,username"
+                                        [style]="{'width': '100%'}">
+                                        <ng-template let-user pTemplate="item">
+                                            <div class="user-item">
+                                                <span class="user-email">{{ user.email }}</span>
+                                                <span class="user-name" *ngIf="user.username">({{ user.username
+                                                    }})</span>
+                                            </div>
+                                        </ng-template>
+                                    </p-dropdown>
+                                </ng-container>
+
+                                <ng-template #loadingUsers>
+                                    <select class="form-control" formControlName="referralUser" [disabled]="true">
+                                        <option value="">Загрузка пользователей...</option>
+                                    </select>
+                                </ng-template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success"
+                            [disabled]="!generateForm.valid || (isLoading$ | async)">
+                            <span *ngIf="isLoading$ | async" class="spinner-border spinner-border-sm me-2"></span>
+                            Сгенерировать промокоды
+                        </button>
+                        <button type="button" class="btn btn-secondary ms-2" (click)="toggleGenerateForm()">
+                            Отмена
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Таблица промокодов -->
+    <div class="promocodes-table">
+        <div class="card">
+            <div class="card-header">
+                <h3>Существующие промокоды</h3>
+            </div>
+            <div class="card-body">
+                <div *ngIf="isLoading$ | async" class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Загрузка...</span>
+                    </div>
+                </div>
+
+                <div *ngIf="!(isLoading$ | async)" class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Код</th>
+                                <th>Сумма</th>
+                                <th>Тип</th>
+                                <th>Статус</th>
+                                <th>Использований</th>
+                                <th>Срок действия</th>
+                                <th>Реферал</th>
+                                <th>Создан</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let promocode of promocodes$ | async">
+                                <td>
+                                    <span class="promocode-text">{{ promocode.code }}</span>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary ms-2"
+                                        (click)="copyToClipboard(promocode.code)" title="Скопировать">
+                                        📋
+                                    </button>
+                                </td>
+                                <td>{{ (promocode.amount / 100) | currency:'USD':'symbol':'1.2-2' }}</td>
+                                <td>
+                                    <span class="badge" [class]="promocode.isReusable ? 'bg-info' : 'bg-warning'">
+                                        {{ promocode.isReusable ? 'Многоразовый' : 'Одноразовый' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge" [class]="getStatusClass(promocode)">
+                                        {{ getStatusText(promocode) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {{ promocode.currentUsage }}
+                                    <span *ngIf="promocode.usageLimit">/ {{ promocode.usageLimit }}</span>
+                                    <span *ngIf="!promocode.usageLimit && promocode.isReusable">/ ∞</span>
+                                </td>
+                                <td>
+                                    <span *ngIf="promocode.expirationDate; else noExpiration">
+                                        {{ formatDate(promocode.expirationDate) }}
+                                    </span>
+                                    <ng-template #noExpiration>
+                                        <span class="text-muted">Без ограничений</span>
+                                    </ng-template>
+                                </td>
+                                <td>
+                                    <span *ngIf="promocode.referralUser; else noReferral">
+                                        {{ promocode.referralUser }}
+                                    </span>
+                                    <ng-template #noReferral>
+                                        <span class="text-muted">Без привязки</span>
+                                    </ng-template>
+                                </td>
+                                <td>{{ formatDate(promocode.createdAt) }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                            (click)="copyToClipboard(promocode.code)">
+                                            Копировать
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-warning"
+                                            *ngIf="promocode.isActive" (click)="deactivatePromocode(promocode.id)"
+                                            [disabled]="(isLoading$ | async)" title="Отключить промокод">
+                                            Отключить
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-success"
+                                            *ngIf="!promocode.isActive" (click)="activatePromocode(promocode.id)"
+                                            [disabled]="(isLoading$ | async)" title="Включить промокод">
+                                            Включить
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                            (click)="deletePromocode(promocode.id)" [disabled]="(isLoading$ | async)"
+                                            title="Удалить промокод">
+                                            Удалить
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr *ngIf="(promocodes$ | async)?.length === 0">
+                                <td colspan="9" class="text-center text-muted">
+                                    Промокоды не найдены
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

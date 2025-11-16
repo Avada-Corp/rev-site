@@ -1,0 +1,29 @@
+<div *ngIf="groupedTransactions.length === 0" class="no-data-message">
+    Нет данных о реферальных платежах
+</div>
+
+<p-accordion *ngIf="groupedTransactions.length > 0" [multiple]="true">
+    <p-accordionTab *ngFor="let monthGroup of groupedTransactions; trackBy: trackByMonthYear"
+        [header]="getHeaderText(monthGroup)" [selected]="false">
+        <p-table [value]="monthGroup.transactions" styleClass="p-datatable-striped">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Дата</th>
+                    <th>Описание</th>
+                    <th>Сумма</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-transaction>
+                <tr>
+                    <td>{{ transaction.date | date:'dd.MM.yyyy HH:mm' }}</td>
+                    <td>
+                        <div class="commission-explanation">{{formatExplanation(transaction.explanation)}}</div>
+                    </td>
+                    <td><span
+                            [ngClass]="{'positive-value': transaction.amount > 0, 'negative-value': transaction.amount < 0}">{{
+                            (transaction.amount/100).toFixed(2) }}</span></td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </p-accordionTab>
+</p-accordion>

@@ -1,0 +1,44 @@
+<p-toast></p-toast>
+<script type="text/javascript">
+  function onTelegramAuth(user) {
+    alert('Logged in as ' + user.first_name + ' ' + user.last_name + ' (' + user.id + (user.username ? ', @' + user.username : '') + ')');
+  }
+</script>
+<div class="container">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card-login">
+        <div class="text-center">
+          <h1>Login</h1>
+          <h6 class="mt-2">Please enter email and password</h6>
+        </div>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <div class="mb-3">
+            <span class="p-float-label">
+              <input pInputText id="email" formControlName="email" type="email" />
+              <label htmlFor="email">Email address</label>
+            </span>
+          </div>
+          <div class="mb-3">
+            <span class="p-float-label">
+              <input pInputText id="password" formControlName="password" type="password" />
+              <label htmlFor="password">Password</label>
+            </span>
+          </div>
+          <div class="mb-3">
+            <a class="login-link mt-2" routerLink="/auth/forget">Forget? Click here</a>
+          </div>
+          <div class="mb-3">
+            <p-button type="submit" styleClass="p-button-raised" class="btn btn-primary">Login</p-button>
+          </div>
+          <div class="mb-3">
+            <a class="login-link mt-2" routerLink="/auth/signup" queryParamsHandling="preserve">New user? Click to signup</a>
+          </div>
+        </form>
+        <ngx-telegram-widget [botName]="botName" [buttonSize]="'large'" [showUserPhoto]="false"
+          [redirectURL]="getTgRefLink()">
+        </ngx-telegram-widget>
+      </div>
+    </div>
+  </div>
+</div>

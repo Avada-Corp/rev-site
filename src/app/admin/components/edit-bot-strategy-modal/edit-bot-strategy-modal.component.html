@@ -1,0 +1,52 @@
+<p-dialog header="Редактирование стратегии" [(visible)]="visible" [modal]="true"
+    [style]="{width: '60vw', maxHeight: '80vh'}" [closable]="true" [resizable]="false" (onHide)="onHide()"
+    (onShow)="onShow()">
+
+    <form [formGroup]="strategyForm">
+        <div class="modal-content">
+            <div class="form-section">
+                <h4>Название стратегии (Русский):</h4>
+                <input pInputText formControlName="name" class="strategy-input"
+                    placeholder="Введите название на русском"
+                    [ngClass]="{ 'p-invalid': strategyForm.get('name')?.invalid && strategyForm.get('name')?.touched }" />
+                <small *ngIf="strategyForm.get('name')?.invalid && strategyForm.get('name')?.touched"
+                    class="p-error">Название обязательно</small>
+            </div>
+
+            <div class="form-section">
+                <h4>Название стратегии (English):</h4>
+                <input pInputText formControlName="nameEn" class="strategy-input"
+                    placeholder="Enter strategy name in English"
+                    [ngClass]="{ 'p-invalid': strategyForm.get('nameEn')?.invalid && strategyForm.get('nameEn')?.touched }" />
+                <small *ngIf="strategyForm.get('nameEn')?.invalid && strategyForm.get('nameEn')?.touched"
+                    class="p-error">Name is required</small>
+            </div>
+
+            <div class="form-section">
+                <h4>Описание стратегии (Русский):</h4>
+                <textarea pInputTextarea formControlName="description" class="strategy-textarea"
+                    placeholder="Введите описание на русском" rows="5"
+                    [ngClass]="{ 'p-invalid': strategyForm.get('description')?.invalid && strategyForm.get('description')?.touched }"></textarea>
+                <small *ngIf="strategyForm.get('description')?.invalid && strategyForm.get('description')?.touched"
+                    class="p-error">Описание обязательно</small>
+            </div>
+
+            <div class="form-section">
+                <h4>Описание стратегии (English):</h4>
+                <textarea pInputTextarea formControlName="descriptionEn" class="strategy-textarea"
+                    placeholder="Enter strategy description in English" rows="5"
+                    [ngClass]="{ 'p-invalid': strategyForm.get('descriptionEn')?.invalid && strategyForm.get('descriptionEn')?.touched }"></textarea>
+                <small *ngIf="strategyForm.get('descriptionEn')?.invalid && strategyForm.get('descriptionEn')?.touched"
+                    class="p-error">Description is required</small>
+            </div>
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Отмена" icon="pi pi-times" styleClass="p-button-text" (click)="onHide()">
+        </p-button>
+        <p-button label="Сохранить" icon="pi pi-check" styleClass="p-button-primary" [loading]="loading"
+            [disabled]="!strategyForm.valid" (click)="onSave()">
+        </p-button>
+    </ng-template>
+</p-dialog>

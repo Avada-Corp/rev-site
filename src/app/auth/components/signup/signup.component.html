@@ -1,0 +1,48 @@
+<p-toast></p-toast>
+<div class="container">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card-signup">
+        <div class="text-center">
+          <h1>Sign Up</h1>
+          <h6>Register yourself</h6>
+        </div>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <div class="mb-3">
+            <span class="p-float-label">
+              <input pInputText id="email" formControlName="email" type="email" />
+              <label htmlFor="email">Email address</label>
+            </span>
+            <div id="emailHelp" class="form-text mt-2">
+              We'll never share your email with anyone else.
+            </div>
+          </div>
+          <div class="mb-3">
+            <span class="p-float-label">
+              <input pInputText id="password" formControlName="password" type="password" />
+              <label htmlFor="password">Password</label>
+            </span>
+          </div>
+          <div class="mb-3">
+            <span class="p-float-label">
+              <input pInputText id="copyPassword" formControlName="copyPassword" type="password" />
+              <label htmlFor="copyPassword">Repeat password</label>
+            </span>
+          </div>
+          <div class="mb-3">
+            <span class="p-float-label">
+              <input pInputText id="tgAccount" formControlName="tgAccount" type="text" />
+              <label htmlFor="tgAccount">Telegram account</label>
+            </span>
+          </div>
+          <div class="mt-2">
+            <p-button type="submit" class="btn btn-primary">Sign up</p-button>
+          </div>
+        </form>
+        <div class="mt-2">
+          <a class="signup-link mt-2" routerLink="/auth/login">Have account already? Click here to login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

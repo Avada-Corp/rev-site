@@ -1,0 +1,30 @@
+<p-table [value]="allTransactions" styleClass="p-datatable-striped" [sortOrder]="-1">
+    <ng-template pTemplate="header">
+        <tr>
+            <th>Дата</th>
+            <th>Пополнение</th>
+            <th>Списание</th>
+            <th>Итого баланс</th>
+            <th>Тип транзакции</th>
+            <th>Ключ</th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-transaction>
+        <tr>
+            <td>{{ transaction.date | date:'dd.MM.yyyy HH:mm' }}</td>
+            <td [ngClass]="{'positive-value': transaction.deposit > 0}">
+                {{ transaction.deposit > 0 ? '+' + transaction.deposit.toFixed(2) : '' }} </td>
+            <td [ngClass]="{'negative-value': transaction.withdrawal < 0}">
+                {{ transaction.withdrawal < 0 ? transaction.withdrawal.toFixed(2) : '' }} </td>
+            <td [ngClass]="{'positive-value': transaction.runningBalance > 0, 'negative-value': transaction.runningBalance < 0}"
+                [style.font-weight]="'bold'">{{ transaction.runningBalance.toFixed(2) }}</td>
+            <td>{{ getTransactionTypeText(transaction.type) }}</td>
+            <td>{{ transaction.apiName }}</td>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+        <tr>
+            <td colspan="5" class="text-center">Нет данных о транзакциях</td>
+        </tr>
+    </ng-template>
+</p-table>

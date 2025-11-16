@@ -1,0 +1,90 @@
+.lighted {
+  background-color: #d0e7e4 !important;
+}
+
+.controlBtns {
+  display: flex;
+}
+
+.dataBtns p-button:not(:first-child) {
+  margin-left: 10px;
+}
+
+.mngBots {
+  margin-left: 30px;
+
+  p-button:not(:first-child) {
+    margin-left: 10px;
+  }
+}
+
+.footerRow {
+  display: flex;
+  flex-direction: column;
+}
+
+.apiName {
+  color: blue;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #ede8e8;
+  }
+}
+.darker {
+  background-color: #a9a9a94a !important;
+}
+.lgray {
+  background-color: #f8f9fa !important;
+}
+
+.commission-filter-container {
+  margin-top: -50px;
+  margin-bottom: 10px;
+  z-index: 10;
+  position: relative;
+}
+
+:host ::ng-deep .p-dropdown-panel {
+  z-index: 1000 !important;
+}
+
+:host ::ng-deep .p-dropdown {
+  z-index: 10;
+}
+
+// Стили для индикатора обработки
+.processing-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin: 10px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e3e3e3;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+  }
+
+  span {
+    color: #666;
+    font-size: 14px;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,238 @@
+<p-toast></p-toast>
+<p-checkbox [(ngModel)]="hideZeroBalance" [binary]="true" label="Скрыть пользователей с нулевым балансом"
+  (onChange)="clickZeroFilter($event)"></p-checkbox> {{filteredWallets.length}}
+<p-table class="report-table fix-text-clipping" styleClass="p-datatable-striped" [value]="filteredWallets"
+  dataKey="email" *ngIf="wallets.length > 0" [scrollable]="true" scrollHeight="700px"
+  [tableStyle]="{'max-width': '70rem', 'margin': '0 auto'}">
+
+  <ng-template pTemplate="header">
+    <tr>
+      <th pSortableColumn="email">Email <p-sortIcon [field]="'email'"></p-sortIcon></th>
+      <th pSortableColumn="tgUserName">Тг юзер <p-sortIcon [field]="'tgUserName'"></p-sortIcon></th>
+      <th pSortableColumn="accountBalance">Баланс <p-sortIcon [field]="'accountBalance'"></p-sortIcon></th>
+      <th>Пополнение</th>
+      <th pSortableColumn="refPotentialBalance">Ожидаемый реферальный баланс <p-sortIcon
+          [field]="'refPotentialBalance'"></p-sortIcon></th>
+      <th>История</th>
+      <th>Сообщение</th>
+      <th>Отчеты</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-wallet>
+    <tr>
+      <td>{{ wallet.email }}</td>
+      <td>{{ wallet.tgUserName || 'No tg user' }}</td>
+      <td><span
+          [ngClass]="{'positive-value': wallet.accountBalance > 0, 'negative-value': wallet.accountBalance < 0}">{{
+          (wallet.accountBalance / 100).toFixed(2) }}</span></td>
+      <td>
+        <button pButton type="button" icon="pi pi-plus" class="p-button-sm"
+          (click)="openTopUpDialog(wallet.email)"></button>
+      </td>
+      <td>
+        <div class="ref-balance-cell">
+          <span class="balance-amount"
+            [ngClass]="{'positive-value': wallet.refPotentialBalance > 0, 'negative-value': wallet.refPotentialBalance < 0}">{{
+            (wallet.refPotentialBalance / 100).toFixed(2) }}</span>
+          <button pButton type="button" icon="pi pi-eye" class="p-button-sm p-button-secondary details-btn"
+            (click)="showWalletDetails(wallet.email)" title="Детали"></button>
+        </div>
+      </td>
+      <td>
+        <button pButton type="button" label="История" class="p-button-sm"
+          (click)="showCommissionsHistory(wallet.email)"></button>
+      </td>
+      <td>
+        <button pButton type="button" icon="pi pi-send" class="p-button-sm p-button-info"
+          (click)="openMessageDialog(wallet.email, wallet.tgUserName)"></button>
+      </td>
+      <td>
+        <button pButton type="button" label="Отчеты" class="p-button-sm p-button-success"
+          (click)="showUserCommissionReport(wallet.email)"></button>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<!-- Диалог для пополнения баланса -->
+<p-dialog [(visible)]="displayTopUpModal" [header]="modalTitle" [modal]="true" [style]="{width: '350px'}"
+  styleClass="top-up-dialog">
+  <div class="current-balance mb-3 mt-3">
+    <span class="balance-label">Текущий баланс:</span>
+    <span class="balance-value">{{ currentUserBalance.toFixed(2) }}</span>
+  </div>
+  <div class="p-field mt-3">
+    <label for="topUpAmount" class="block mb-2 font-medium">Сумма пополнения</label>
+    <input type="number" id="topUpAmount" pInputText class="p-inputtext w-full" [(ngModel)]="topUpAmount"
+      #amountDialogInput (blur)="formatMoneyInput(amountDialogInput)">
+  </div>
+  <div class="p-dialog-footer mt-4 flex justify-content-between">
+    <button pButton type="button" label="Отмена" class="p-button-text" (click)="displayTopUpModal = false"></button>
+    <button pButton type="button" label="Пополнить" class="p-button-primary" (click)="confirmTopUp()"
+      [disabled]="!topUpAmount"></button>
+  </div>
+</p-dialog>
+
+<!-- Диалог для отправки личного сообщения -->
+<p-dialog [(visible)]="displayMessageModal" [header]="messageModalTitle" [modal]="true" [style]="{width: '700px'}"
+  styleClass="message-dialog">
+  <div class="user-info mb-3 mt-3">
+    <span class="user-label">Пользователь:</span>
+    <span class="user-value">{{ selectedUserInfo }}</span>
+  </div>
+  <div class="p-field mt-3">
+    <label for="messageText" class="block mb-2 font-medium">Текст сообщения</label>
+    <textarea id="messageText" pInputTextarea rows="8" class="p-inputtextarea w-full" [(ngModel)]="messageText"
+      placeholder="Введите текст сообщения..."></textarea>
+  </div>
+
+  <!-- Шаблонные сообщения -->
+  <div class="template-messages mt-5">
+    <label class="block mb-3 font-medium">Шаблонные сообщения:</label>
+    <div class="flex flex-column gap-2">
+      <button pButton type="button"
+        label="Добро пожаловать в нашу систему! Если у вас есть вопросы, не стесняйтесь обращаться."
+        class="p-button-sm p-button-outlined text-left"
+        (click)="setTemplateMessage('Добро пожаловать в нашу систему! Если у вас есть вопросы, не стесняйтесь обращаться.')"></button>
+
+      <button pButton type="button"
+        label="Рекомендуем пополнить баланс для продолжения торговли. При необходимости обратитесь в поддержку."
+        class="p-button-sm p-button-outlined text-left"
+        (click)="setTemplateMessage('Рекомендуем пополнить баланс для продолжения торговли. При необходимости обратитесь в поддержку.')"></button>
+
+      <button pButton type="button"
+        label="У нас появились новые возможности! Ознакомьтесь с обновлениями в личном кабинете."
+        class="p-button-sm p-button-outlined text-left"
+        (click)="setTemplateMessage('У нас появились новые возможности! Ознакомьтесь с обновлениями в личном кабинете.')"></button>
+
+      <button pButton type="button"
+        label="Как дела с торговлей? Если возникли проблемы или вопросы - пишите, поможем разобраться."
+        class="p-button-sm p-button-outlined text-left"
+        (click)="setTemplateMessage('Как дела с торговлей? Если возникли проблемы или вопросы - пишите, поможем разобраться.')"></button>
+
+      <button pButton type="button" label="Спасибо за использование нашей системы! Ваши результаты впечатляют."
+        class="p-button-sm p-button-outlined text-left"
+        (click)="setTemplateMessage('Спасибо за использование нашей системы! Ваши результаты впечатляют.')"></button>
+    </div>
+  </div>
+
+  <div class="p-dialog-footer mt-4 flex justify-content-between">
+    <button pButton type="button" label="Отмена" class="p-button-text" (click)="displayMessageModal = false"></button>
+    <button pButton type="button" label="Отправить" class="p-button-primary" (click)="confirmSendMessage()"
+      [disabled]="!messageText || messageText.trim().length === 0"></button>
+  </div>
+</p-dialog>
+
+<!-- Диалог для истории комиссий и пополнений -->
+<app-wallet-history-modal [(visible)]="displayCommissionsModal" [modalTitle]="modalTitle"
+  [selectedWalletCommissions]="selectedWalletCommissions"
+  [selectedWalletManualTransactions]="selectedWalletManualTransactions"
+  [selectedWalletReferralTransactions]="selectedWalletReferralTransactions"
+  [selectedWalletReferralWithdrawals]="selectedWalletReferralWithdrawals"
+  [selectedWalletPartnerCommissions]="selectedWalletPartnerCommissions"
+  [selectedWalletCryptoTransactions]="selectedWalletCryptoTransactions">
+</app-wallet-history-modal>
+
+<!-- Диалог для детальной информации о кошельке -->
+<p-dialog [(visible)]="displayWalletDetailsModal" [header]="walletDetailsModalTitle" [modal]="true"
+  [style]="{width: '900px'}" styleClass="wallet-details-dialog">
+  <div class="wallet-details-content">
+    <div class="user-info mb-3">
+      <h4>Информация о пользователе</h4>
+      <div class="user-details">
+        <p><strong>Email:</strong> {{ selectedWalletDetailsEmail }}</p>
+        <p><strong>Telegram:</strong> {{ selectedWalletDetailsUser }}</p>
+        <p><strong>Баланс:</strong> {{ selectedWalletDetailsBalance }} USDT</p>
+      </div>
+    </div>
+
+    <div class="expected-payments mt-4">
+      <h4>Ожидаемые платежи</h4>
+      <p-table [value]="expectedPayments" styleClass="p-datatable-striped" [scrollable]="true" scrollHeight="400px"
+        *ngIf="expectedPayments.length > 0">
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Реферрал</th>
+            <th>Размер платежа</th>
+            <th>Комиссия</th>
+            <th>Описание</th>
+            <th>Описание комиссии</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-payment>
+          <tr>
+            <td>{{ payment.tgUserName || '—' }}</td>
+            <td>{{ (payment.amount / 100).toFixed(2) }} USDT</td>
+            <td>{{ ((payment.commissionAmount || 0) / 100).toFixed(2) }} ({{ ((payment.amountReserved || 0) /
+              100).toFixed(2) }})</td>
+            <td>{{ payment.explanation }}</td>
+            <td>{{ payment.commissionExplanation | slice:0:50 }}{{ payment.commissionExplanation &&
+              payment.commissionExplanation.length > 50 ? '…' : '' }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      <div class="no-data" *ngIf="expectedPayments.length === 0">
+        <p>Нет ожидаемых платежей</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-dialog-footer">
+    <button pButton type="button" label="Закрыть" class="p-button-text"
+      (click)="displayWalletDetailsModal = false"></button>
+  </div>
+</p-dialog>
+
+<!-- Диалог для отчетов пользователя -->
+<p-dialog [(visible)]="displayReportsModal" [header]="reportsModalTitle" [modal]="true"
+  [style]="{width: '900px', height: '80vh'}" styleClass="reports-dialog">
+  <div class="reports-content" *ngIf="!isReportLoading">
+
+    <!-- Текст отчета -->
+    <div class="report-text-section">
+      <h4 class="mb-3">Текстовый отчет</h4>
+      <div class="report-text-container"
+        style="max-height: 400px; overflow-y: auto; padding: 15px; border: 1px solid #e0e0e0; border-radius: 4px; background-color: #f9f9f9; font-family: monospace; white-space: pre-wrap;">
+        {{ reportText }}
+      </div>
+    </div>
+
+    <!-- PDF секция -->
+    <div class="report-pdf-section mt-4" *ngIf="reportPdfBase64 || reportPdfUrl">
+      <h4 class="mb-3">PDF отчет</h4>
+      <div class="pdf-actions">
+        <button pButton type="button" label="Предпросмотр PDF" icon="pi pi-eye" class="p-button-outlined p-button-info"
+          (click)="previewReportPdf()"></button>
+      </div>
+    </div>
+
+    <!-- Секция отправки отчета -->
+    <div class="send-report-section mt-4">
+      <h4 class="mb-3">Отправка отчета</h4>
+      <div class="send-actions">
+        <button pButton type="button" label="Отправить пользователю" icon="pi pi-send"
+          class="p-button-outlined p-button-success" (click)="sendReportToUser()"
+          [disabled]="!currentReportEmail"></button>
+      </div>
+    </div>
+
+    <!-- Информация об отсутствии PDF -->
+    <div class="no-pdf-section mt-4" *ngIf="!reportPdfBase64 && !reportPdfUrl">
+      <p class="text-muted">PDF файл недоступен</p>
+    </div>
+
+  </div>
+
+  <!-- Индикатор загрузки -->
+  <div class="loading-container" *ngIf="isReportLoading" style="text-align: center; padding: 50px;">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+    <p class="mt-3">Загружаем отчет...</p>
+  </div>
+
+  <div class="p-dialog-footer">
+    <button pButton type="button" label="Закрыть" class="p-button-text" (click)="displayReportsModal = false"></button>
+  </div>
+</p-dialog>

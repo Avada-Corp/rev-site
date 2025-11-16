@@ -1,0 +1,293 @@
+<div class="settings-container">
+    <p-confirmDialog></p-confirmDialog>
+    
+    <h2>Настройки</h2>
+
+    <div class="settings-section">
+        <h3>Расчет комиссии и списание средств</h3>
+        <p class="description">
+            Настройка текста для отображения информации о расчете комиссии и списании средств с баланса пользователя.
+        </p>
+
+        <!-- <div class="language-controls">
+            <label>Текущий язык редактирования:</label>
+            <p-button *ngFor="let lang of ['ru', 'en']" [label]="lang === 'ru' ? 'Русский' : 'English'"
+                [styleClass]="currentLanguage === lang ? 'p-button-primary' : 'p-button-outlined'"
+                (click)="onLanguageChange(lang)">
+            </p-button>
+        </div> -->
+
+        <p-button label="Редактировать текст" icon="pi pi-pencil" styleClass="p-button-primary"
+            (click)="onEditCommissionText()" pTooltip="Редактировать текст с информацией о комиссии">
+        </p-button>
+    </div>
+
+    <div class="settings-section" *ngIf="vm$ | async as vm">
+        <h3>Воронка</h3>
+        <p class="description">
+            Редактирование сцен воронки для бота.
+        </p>
+
+        <div class="scenes-list-settings" *ngIf="vm.scenes && vm.scenes.length > 0">
+            <div *ngFor="let scene of vm.scenes" class="scene-item-wrapper">
+                <p-button [label]="scene.sceneId" 
+                    icon="pi pi-pencil" styleClass="p-button-sm p-button-outlined scene-button"
+                    (click)="onEditFunnel(scene)" pTooltip="Редактировать сцену {{ scene.sceneId }}">
+                </p-button>
+                <p-button icon="pi pi-trash" 
+                    styleClass="p-button-sm p-button-danger p-button-outlined scene-delete-button"
+                    (click)="onDeleteScene(scene)" pTooltip="Удалить сцену {{ scene.sceneId }}">
+                </p-button>
+            </div>
+        </div>
+
+        <div class="funnel-actions">
+            <p-button label="Добавить сцену" icon="pi pi-plus" styleClass="p-button-success"
+                (click)="onAddNewScene()" pTooltip="Добавить новую сцену">
+            </p-button>
+        </div>
+    </div>
+
+    <div class="settings-section" *ngIf="vm$ | async as vm">
+        <h3>Стратегии ботов</h3>
+        <p class="description">
+            Редактирование названий и описаний стратегий ботов.
+        </p>
+
+        <div class="strategies-list">
+            <div class="strategy-item" *ngFor="let strategy of vm.botStrategies">
+                <div class="strategy-info">
+                    <div class="strategy-name">
+                        {{ strategy.name }} ({{ strategy.strategyId }})
+                        <i class="pi pi-info-circle strategy-info-icon" (click)="onShowCalculations(strategy)"
+                            pTooltip="Показать примеры расчетов"></i>
+                    </div>
+                    <div class="strategy-description">{{ strategy.description }}</div>
+                    <div class="strategy-money-policy"
+                        *ngIf="strategy.minDeposit || strategy.actualLeverage || strategy.botCount !== undefined || strategy.realLeverage !== undefined">
+                        <span class="policy-label">Настройки:</span>
+                        <span *ngIf="strategy.minDeposit" class="policy-item">Мин. депозит: {{ strategy.minDeposit
+                            }}</span>
+                        <span *ngIf="strategy.actualLeverage" class="policy-item">Факт плечо: {{ strategy.actualLeverage
+                            }}x</span>
+                        <span *ngIf="strategy.botCount !== undefined" class="policy-item">Кол-во ботов: {{
+                            strategy.botCount }}</span>
+                        <span *ngIf="strategy.realLeverage !== undefined" class="policy-item">Техническое плечо: {{
+                            strategy.realLeverage }}x</span>
+                    </div>
+                </div>
+                <div class="strategy-actions">
+                    <p-button icon="pi pi-pencil" styleClass="p-button-sm p-button-outlined"
+                        (click)="onEditStrategy(strategy)" pTooltip="Редактировать стратегию">
+                    </p-button>
+                    <p-button icon="pi pi-cog" styleClass="p-button-sm p-button-outlined"
+                        (click)="onEditMoneyPolicy(strategy)" pTooltip="Настройки денежной политики">
+                    </p-button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for editing commission text -->
+<app-edit-commission-text-modal *ngIf="vm$ | async as vm" [visible]="isModalVisible" [currentTexts]="vm.commissionTexts"
+    [currentLanguage]="vm.currentLanguage" [loading]="vm.isLoading" (visibleChange)="onModalClose()"
+    (save)="onSaveCommissionText($event)">
+</app-edit-commission-text-modal>
+
+<!-- Modal for editing bot strategy -->
+<app-edit-bot-strategy-modal *ngIf="vm$ | async as vm" [visible]="isStrategyModalVisible" [strategy]="selectedStrategy"
+    [loading]="vm.isLoading" (visibleChange)="onStrategyModalClose()" (save)="onSaveStrategy($event)">
+</app-edit-bot-strategy-modal>
+
+<!-- Modal for editing strategy money policy -->
+<app-edit-strategy-money-policy-modal *ngIf="vm$ | async as vm" [visible]="isMoneyPolicyModalVisible"
+    [strategy]="selectedStrategy" [loading]="vm.isLoading" (visibleChange)="onMoneyPolicyModalClose()"
+    (save)="onSaveMoneyPolicy($event)">
+</app-edit-strategy-money-policy-modal>
+
+<!-- Modal for editing funnel -->
+<app-edit-funnel-modal [visible]="isFunnelModalVisible"
+    [scene]="selectedScene" [loading]="(isScenesLoading$ | async) || false" 
+    (visibleChange)="onFunnelModalClose()" (save)="onSaveScene($event)">
+</app-edit-funnel-modal>
+
+<!-- Modal for deposit calculations -->
+<p-dialog [(visible)]="isCalculationsModalVisible" [modal]="true" [dismissableMask]="true" [draggable]="false"
+    [resizable]="false" styleClass="calculations-modal" (onHide)="onCalculationsModalClose()">
+    <ng-template pTemplate="header">
+        <div class="modal-header-custom">
+            <h3>📊 Настройки денежной политики</h3>
+            <div class="strategy-title" *ngIf="selectedStrategy">
+                {{ selectedStrategy.name }} ({{ selectedStrategy.strategyId }})
+            </div>
+        </div>
+    </ng-template>
+
+    <div class="calculations-content" *ngIf="selectedStrategy">
+        <div class="no-settings-message"
+            *ngIf="!selectedStrategy.minDeposit && !selectedStrategy.actualLeverage && selectedStrategy.botCount === undefined && selectedStrategy.realLeverage === undefined">
+            <i class="pi pi-info-circle"></i>
+            <span>Настройки денежной политики не заданы</span>
+        </div>
+
+
+        <!-- Примеры расчетов для разных депозитов -->
+        <div class="deposit-variants" *ngIf="selectedStrategy.minDeposit && selectedStrategy.botCount">
+            <!-- Карта 1: На 15% меньше минимального -->
+            <div class="variant-card" style="border-left-color: #ff9800;">
+                <div class="variant-header">
+                    <span class="variant-icon">⚠️</span>
+                    <span class="variant-title">На 15% меньше минимального</span>
+                </div>
+                <div class="variant-deposit">
+                    {{ calculateDeposit1() | number:'1.0-2' }} USDT
+                </div>
+                <div class="variant-note" style="color: #f57c00; font-size: 12px; margin-bottom: 12px;">
+                    <i class="pi pi-exclamation-triangle"></i>
+                    Недостаточный депозит
+                </div>
+                <div class="bot-count-section">
+                    <div class="bot-count-label">Количество ботов</div>
+                    <div class="bot-count-value">{{ calculateBotCount(calculateDeposit1()) }}</div>
+                </div>
+                <div class="wallet-size-section">
+                    <div class="wallet-size-header">
+                        <i class="pi pi-wallet"></i>
+                        <span>Размер кошелька</span>
+                    </div>
+                    <div class="wallet-size-results">
+                        <div class="wallet-result-item">
+                            <span class="result-label">Лонг, %</span>
+                            <span class="result-value">{{ calculateLongPercent(calculateDeposit1()) | number:'1.0-2'
+                                }}%</span>
+                        </div>
+                        <div class="wallet-result-item">
+                            <span class="result-label">Шорт, USDT</span>
+                            <span class="result-value">{{ calculateShortUsdt(calculateDeposit1()) | number:'1.0-2'
+                                }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карта 2: Средняя цифра -->
+            <div class="variant-card" style="border-left-color: #2196F3;">
+                <div class="variant-header">
+                    <span class="variant-icon">📊</span>
+                    <span class="variant-title">Средний депозит</span>
+                </div>
+                <div class="variant-deposit">
+                    {{ calculateDeposit2() | number:'1.0-2' }} USDT
+                </div>
+                <div class="variant-note" style="color: #1976D2; font-size: 12px; margin-bottom: 12px;">
+                    <i class="pi pi-info-circle"></i>
+                    Рекомендуемый баланс
+                </div>
+                <div class="bot-count-section">
+                    <div class="bot-count-label">Количество ботов</div>
+                    <div class="bot-count-value">{{ calculateBotCount(calculateDeposit2()) }}</div>
+                </div>
+                <div class="wallet-size-section">
+                    <div class="wallet-size-header">
+                        <i class="pi pi-wallet"></i>
+                        <span>Размер кошелька</span>
+                    </div>
+                    <div class="wallet-size-results">
+                        <div class="wallet-result-item">
+                            <span class="result-label">Лонг, %</span>
+                            <span class="result-value">{{ calculateLongPercent(calculateDeposit2()) | number:'1.0-2'
+                                }}%</span>
+                        </div>
+                        <div class="wallet-result-item">
+                            <span class="result-label">Шорт, USDT</span>
+                            <span class="result-value">{{ calculateShortUsdt(calculateDeposit2()) | number:'1.0-2'
+                                }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карта 3: Удвоенный -->
+            <div class="variant-card" style="border-left-color: #4CAF50;">
+                <div class="variant-header">
+                    <span class="variant-icon">💎</span>
+                    <span class="variant-title">Удвоенный депозит</span>
+                </div>
+                <div class="variant-deposit">
+                    {{ calculateDeposit3() | number:'1.0-2' }} USDT
+                </div>
+                <div class="variant-note" style="color: #388E3C; font-size: 12px; margin-bottom: 12px;">
+                    <i class="pi pi-check-circle"></i>
+                    Оптимальный баланс
+                </div>
+                <div class="bot-count-section">
+                    <div class="bot-count-label">Количество ботов</div>
+                    <div class="bot-count-value">{{ calculateBotCount(calculateDeposit3()) }}</div>
+                </div>
+                <div class="wallet-size-section">
+                    <div class="wallet-size-header">
+                        <i class="pi pi-wallet"></i>
+                        <span>Размер кошелька</span>
+                    </div>
+                    <div class="wallet-size-results">
+                        <div class="wallet-result-item">
+                            <span class="result-label">Лонг, %</span>
+                            <span class="result-value">{{ calculateLongPercent(calculateDeposit3()) | number:'1.0-2'
+                                }}%</span>
+                        </div>
+                        <div class="wallet-result-item">
+                            <span class="result-label">Шорт, USDT</span>
+                            <span class="result-value">{{ calculateShortUsdt(calculateDeposit3()) | number:'1.0-2'
+                                }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карта 4: Кастомный ввод -->
+            <div class="variant-card custom-card" style="border-left-color: #9C27B0;">
+                <div class="variant-header">
+                    <span class="variant-icon">✏️</span>
+                    <span class="variant-title">Ваш депозит</span>
+                </div>
+                <div class="custom-input-wrapper">
+                    <input type="number" class="custom-deposit-input" [(ngModel)]="customDeposit"
+                        placeholder="Введите сумму" (input)="onCustomDepositChange()" min="0" step="100">
+                    <span class="input-currency">USDT</span>
+                </div>
+                <div class="variant-note"
+                    style="color: #7B1FA2; font-size: 12px; margin-top: 8px; margin-bottom: 12px;">
+                    <i class="pi pi-calculator"></i>
+                    Кастомный расчет
+                </div>
+                <div class="bot-count-section" *ngIf="customDeposit > 0">
+                    <div class="bot-count-label">Количество ботов</div>
+                    <div class="bot-count-value">{{ calculateBotCount(customDeposit) }}</div>
+                </div>
+                <div class="wallet-size-section" *ngIf="customDeposit > 0">
+                    <div class="wallet-size-header">
+                        <i class="pi pi-wallet"></i>
+                        <span>Размер кошелька</span>
+                    </div>
+                    <div class="wallet-size-results">
+                        <div class="wallet-result-item">
+                            <span class="result-label">Лонг, %</span>
+                            <span class="result-value">{{ calculateLongPercent(customDeposit) | number:'1.0-2'
+                                }}%</span>
+                        </div>
+                        <div class="wallet-result-item">
+                            <span class="result-label">Шорт, USDT</span>
+                            <span class="result-value">{{ calculateShortUsdt(customDeposit) | number:'1.0-2' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer-note">
+            <i class="pi pi-check-circle"></i>
+            <span>Настройки денежной политики стратегии</span>
+        </div>
+    </div>
+</p-dialog>

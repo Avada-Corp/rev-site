@@ -1,0 +1,116 @@
+/* You can add global styles to this file, and also import other style files */
+
+/* Importing Bootstrap SCSS file. */
+/* @import "~bootstrap/scss/bootstrap"; */
+
+/* Importing Bootstrap SCSS file. */
+/* @import "~bootstrap/scss/bootstrap"; */
+
+@import "primeicons/primeicons.css";
+
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* Глобальные стили */
+body {
+  font-family: "Roboto", "Segoe UI", sans-serif;
+  color: #334155;
+  background-color: #f8fafc;
+}
+
+/* PrimeNG переопределения */
+.p-component {
+  font-family: "Roboto", "Segoe UI", sans-serif;
+}
+
+.p-button {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.p-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.p-card {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.p-table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.p-dropdown {
+  border-radius: 6px;
+}
+
+.p-inputtext {
+  border-radius: 6px;
+}
+
+.p-dialog {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.p-toast .p-toast-message {
+  border-radius: 6px;
+}
+
+/* Утилиты */
+.shadow-sm {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.shadow {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-md {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.rounded {
+  border-radius: 6px;
+}
+
+.rounded-lg {
+  border-radius: 8px;
+}
+
+.transition {
+  transition: all 0.2s;
+}
+
+/* Стили для тултипов с HTML-содержимым */
+.p-tooltip {
+  max-width: 500px !important;
+  
+  .p-tooltip-text {
+    padding: 0 !important;
+    background: white !important;
+    color: #333 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+    line-height: 1.5 !important;
+  }
+}

@@ -1,0 +1,44 @@
+.card-login,
+.card-signup {
+  border: none;
+  width: 500px;
+  padding: 40px;
+  position: absolute;
+  top: 20%;
+  left: 20%;
+  /* transform: translate(-100px, 100px); */
+  /* background: rgb(63, 144, 202); */
+  background: linear-gradient(
+    135deg,
+    rgba(71, 199, 136, 1) 9%,
+    rgba(152, 221, 235, 1) 100%
+  );
+}
+.card-login h1,
+.card-signup h1,
+h6 {
+  color: #fff;
+  font-weight: 400;
+}
+label,
+#emailHelp {
+  color: #fff;
+}
+
+.login-link,
+.signup-link {
+  color: #fff;
+}
+
+.mt-2 {
+  font-size: smaller;
+}
+/* p-button {
+  margin: 20px;
+} */
+.mb-3 {
+  margin: 30px;
+}
+.p-float-label label {
+  color: gray;
+}

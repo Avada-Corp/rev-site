@@ -1,0 +1,684 @@
+/* Стили для заголовка страницы с поиском */
+.api-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  flex-wrap: wrap;
+}
+
+.controls-row {
+  flex-shrink: 0;
+}
+
+.search-container {
+  flex: 1;
+  min-width: 300px;
+  max-width: 500px;
+  margin-left: auto;
+}
+
+.search-input {
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid #ced4da;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.search-input:focus {
+  outline: 0;
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.search-container .p-input-icon-left {
+  width: 100%;
+}
+
+.search-container .p-input-icon-left > i {
+  left: 0.75rem;
+  color: #6c757d;
+}
+
+.search-container .p-input-icon-left > input {
+  padding-left: 2.5rem;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .api-table-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .search-container {
+    min-width: auto;
+    max-width: none;
+    margin-left: 0;
+  }
+
+  .controls-row {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+}
+
+/* Стили для панели массовых операций */
+.bulk-actions-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1050;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: none;
+  border-bottom: 3px solid #007bff;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 123, 255, 0.15);
+  backdrop-filter: blur(10px);
+  min-height: 80px;
+}
+
+.bulk-actions-info {
+  font-weight: 700;
+  color: #007bff;
+  font-size: 1.1rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.bulk-actions-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: normal;
+}
+
+.bulk-actions-loading .pi-spinner {
+  color: #007bff;
+  font-size: 1rem;
+}
+
+.bulk-progress {
+  background-color: #007bff;
+  color: white;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-left: 0.5rem;
+}
+
+.bulk-actions-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
+}
+
+.bulk-actions-buttons .p-button {
+  min-width: auto;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+}
+
+/* Отступ для основного контента когда показана панель массовых операций */
+.content-with-fixed-panel {
+  margin-top: 100px; /* Высота панели (80px) + отступ (20px) */
+  padding-top: 1rem;
+}
+
+/* Стили для строки контролов */
+.controls-row {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.controls-row .p-checkbox,
+.controls-row .p-button {
+  margin-right: 0;
+}
+
+.controls-row .p-checkbox .p-checkbox-label {
+  font-weight: 500;
+  color: #495057;
+}
+
+.controls-row .p-button {
+  background: #007bff;
+  border-color: #007bff;
+  color: white;
+  font-weight: 500;
+}
+
+.controls-row .p-button:hover {
+  background: #0056b3;
+  border-color: #0056b3;
+}
+
+.controls-row .p-button:disabled {
+  background: #6c757d;
+  border-color: #6c757d;
+  opacity: 0.65;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 1200px) {
+  .bulk-actions-panel {
+    flex-direction: column;
+    align-items: stretch;
+    min-height: auto;
+    padding: 1rem;
+  }
+
+  .bulk-actions-info {
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .bulk-actions-buttons {
+    justify-content: center;
+    gap: 0.25rem;
+  }
+
+  .bulk-actions-buttons .p-button {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .content-with-fixed-panel {
+    margin-top: 140px;
+  }
+
+  .controls-row {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 768px) {
+  .bulk-actions-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .bulk-actions-buttons .p-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .content-with-fixed-panel {
+    margin-top: 200px;
+  }
+
+  .controls-row {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .controls-row .p-checkbox,
+  .controls-row .p-button {
+    width: 100%;
+  }
+}
+
+/* Дополнительный отступ для таблицы */
+.table-container {
+  transition: margin-top 0.3s ease;
+}
+
+/* Стили для чекбокса выбора пользователя */
+.user-selection-checkbox {
+  margin-right: 8px;
+}
+
+/* Стили для частично выбранного пользователя */
+.user-selection-partial ::ng-deep .p-checkbox-box {
+  background-color: #fff3cd !important;
+  border-color: #ffc107 !important;
+  border-width: 2px !important;
+  position: relative;
+}
+
+/* Скрываем стандартную иконку для частично выбранных */
+.user-selection-partial ::ng-deep .p-checkbox-icon {
+  display: none !important;
+}
+
+/* Добавляем специальный индикатор для частично выбранных */
+.user-selection-partial ::ng-deep .p-checkbox-box::after {
+  content: "−";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 16px;
+  color: #856404;
+  font-weight: bold;
+  line-height: 1;
+}
+
+/* Стили для полностью выбранного пользователя */
+.user-selection-checkbox:not(.user-selection-partial)
+  ::ng-deep
+  .p-checkbox-box.p-highlight {
+  background-color: #007bff !important;
+  border-color: #007bff !important;
+}
+
+.user-selection-checkbox:not(.user-selection-partial)
+  ::ng-deep
+  .p-checkbox-box.p-highlight
+  .p-checkbox-icon {
+  color: white !important;
+}
+
+/* Анимация для переходов между состояниями */
+.user-selection-checkbox ::ng-deep .p-checkbox-box {
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Дополнительные стили для улучшения визуала */
+.user-selection-checkbox {
+  cursor: pointer;
+}
+
+.user-selection-checkbox ::ng-deep .p-checkbox-box:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.api-key-selection-checkbox {
+  margin-right: 8px;
+}
+
+.addBot:not(:first) {
+  margin-left: 8px;
+}
+
+.comm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.user_api {
+  display: flex;
+  align-items: center;
+  min-width: 800px;
+  justify-content: space-between;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.two-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.mngBots {
+  display: flex;
+  gap: 0.5rem;
+}
+
+:host ::ng-deep .p-table {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+:host ::ng-deep .p-table th {
+  background-color: #f1f5f9;
+  color: #334155;
+  font-weight: 600;
+}
+
+:host ::ng-deep .p-table tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+:host ::ng-deep .p-rowgroup-header {
+  background-color: #e2e8f0;
+}
+
+:host ::ng-deep .p-rowgroup-header .font-bold {
+  font-weight: 600;
+  color: #334155;
+}
+
+:host ::ng-deep .p-button.p-button-rounded {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+:host ::ng-deep .p-button.p-button-success {
+  background-color: #10b981;
+}
+
+:host ::ng-deep .p-button.p-button-danger {
+  background-color: #ef4444;
+}
+
+:host ::ng-deep .p-button.p-button-warning {
+  background-color: #f59e0b;
+}
+
+.flip {
+  margin-left: 0.25rem;
+  margin-top: -0.5rem;
+}
+
+/* Add styles for open positions table */
+.positions-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.profit {
+  color: #22c55e;
+  font-weight: bold;
+}
+
+.loss {
+  color: #ef4444;
+  font-weight: bold;
+}
+
+:host ::ng-deep .p-dialog-content {
+  overflow-x: auto;
+}
+
+:host ::ng-deep .p-paginator {
+  justify-content: flex-start;
+  padding: 0.5rem 0;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+  background-color: #f8f9fa;
+  padding: 0.75rem;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+  padding: 0.75rem;
+  white-space: nowrap;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.no-positions {
+  padding: 2rem;
+  text-align: center;
+  font-size: 1.2rem;
+  color: #64748b;
+  background-color: #f8fafc;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.parent-ref-dialog {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Стили для пагинации */
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  font-size: 1.1rem;
+  color: #64748b;
+}
+
+.pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+  border-top: 1px solid #e2e8f0;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pagination-info {
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.page-input {
+  display: flex;
+  align-items: center;
+  margin: 0 0.5rem;
+}
+
+.page-input input {
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0.25rem;
+}
+
+.page-size-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.page-size-selector label {
+  color: #64748b;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .pagination-controls .p-button {
+  min-width: 2.5rem;
+  height: 2.5rem;
+}
+
+:host ::ng-deep .page-size-selector .p-dropdown {
+  min-width: 80px;
+}
+
+@media (max-width: 768px) {
+  .pagination-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .pagination-controls {
+    justify-content: center;
+  }
+
+  .page-size-selector {
+    justify-content: center;
+  }
+}
+
+/* Стили для цветных квадратов с днями */
+.days-badge {
+  display: inline-block;
+  min-width: 30px;
+  padding: 4px 8px;
+  margin-left: 8px;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 12px;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.days-critical {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  animation: pulse-critical 2s infinite;
+}
+
+.days-warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.days-good {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.days-expired {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  animation: pulse-expired 1.5s infinite;
+}
+
+@keyframes pulse-critical {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.5);
+  }
+}
+
+@keyframes pulse-expired {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.rubilnik-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.rubilnik-buttons .p-button {
+  flex: 1 1 calc(33% - 0.5rem);
+  min-width: 90px;
+}
+
+/* Стили для столбца срока заморозки */
+.freeze-period-info {
+  color: #dc3545;
+  font-weight: 500;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  span {
+    font-weight: 600;
+  }
+}
+
+/* Стили для встроенного отображения заморозки */
+.freeze-period-inline {
+  color: #dc3545;
+  font-weight: 500;
+  font-size: 0.85rem;
+
+  span {
+    font-weight: 600;
+  }
+}
+
+/* Стили для встроенного отображения статуса кредитора */
+.creditor-status-inline {
+  font-weight: 500;
+  font-size: 0.85rem;
+
+  span {
+    font-weight: 600;
+  }
+}
+
+/* Диалог редактирования срока заморозки пользователя */
+.user-freeze-period-dialog {
+  ::ng-deep {
+    .p-dialog-content {
+      padding: 1.5rem;
+    }
+
+    .p-dialog-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid #e9ecef;
+    }
+  }
+}
+
+/* Диалог редактирования статуса кредитора пользователя */
+.user-creditor-dialog {
+  ::ng-deep {
+    .p-dialog-content {
+      padding: 1.5rem;
+    }
+
+    .p-dialog-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid #e9ecef;
+    }
+
+    .p-selectbutton {
+      .p-button {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+  }
+}
+
+/* Стили для бейджа стратегии */
+.strategy-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+}

@@ -1,0 +1,64 @@
+<div class="chart-container">
+  <div *ngIf="processedReports.length > 0" class="charts-wrapper">
+    <!-- Кнопки группировки -->
+    <div class="grouping-controls">
+      <span class="grouping-label">Группировка:</span>
+      <div class="grouping-buttons">
+        <button class="grouping-btn" [class.active]="currentGrouping === 1" (click)="setGrouping(1)">
+          По дням
+        </button>
+        <button class="grouping-btn" [class.active]="currentGrouping === 3" (click)="setGrouping(3)">
+          По 3 дня
+        </button>
+        <button class="grouping-btn" [class.active]="currentGrouping === 7" (click)="setGrouping(7)">
+          По 7 дней
+        </button>
+      </div>
+    </div>
+
+    <!-- Общий баланс график -->
+    <div class="chart-box">
+      <h3>Общий баланс</h3>
+      <app-chart [data]="totalBalanceChartData" [options]="chartOptions"></app-chart>
+    </div>
+
+    <div class="chart-box">
+      <h3>unPNL</h3>
+      <app-chart [data]="pnlChartData" [options]="chartOptions"></app-chart>
+    </div>
+
+    <div class="chart-box">
+      <h3>Ежедневный PNL</h3>
+      <app-chart [data]="pnlDailyChartData" [options]="chartOptions"></app-chart>
+    </div>
+  </div>
+  <div *ngIf="processedReports.length > 0" class="simple-table">
+    <h3>Данные</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Дата</th>
+          <th>API</th>
+          <th>Баланс</th>
+          <th>PNL</th>
+          <th>PNL Daily</th>
+          <th>Дельта</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let report of processedReports.slice().reverse()">
+          <td>{{ report?.to | date:'dd.MM.yyyy' }}</td>
+          <td>{{ report?.apiName }}</td>
+          <td [innerHTML]="getTotalBalanceInfo(report)"></td>
+          <td>{{ toFixed(report?.pnl || null) }}</td>
+          <td>{{ toFixed(report?.pnlDaily || null) }}</td>
+          <td>{{ getDeltaInfo(report) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="processedReports.length === 0" class="no-data">
+    <p>Нет данных для отображения</p>
+  </div>
+</div>

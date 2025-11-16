@@ -1,0 +1,25 @@
+<p-toast></p-toast>
+<div class="df">
+  <a [routerLink]="['/']"><p-button styleClass="p-button-help">Home</p-button></a>
+  <a [routerLink]="['/admin/api-table']"><p-button styleClass="p-button-help">Api</p-button></a>
+  <a [routerLink]="['/admin/statistics']"><p-button styleClass="p-button-help">Статистика</p-button></a>
+  <a [routerLink]="['/admin/bots']" *ngIf="isSuperAdmin"><p-button styleClass="p-button-help">Настройки
+      ботов</p-button></a>
+  <a [routerLink]="['/admin/partners']" *ngIf="isSuperAdmin && isMainServer"><p-button
+      styleClass="p-button-help">Партнеры</p-button></a>
+  <a [routerLink]="['/admin/promocodes']"><p-button styleClass="p-button-help">Промокоды</p-button></a>
+  <a [routerLink]="['/admin/promo-history']"><p-button styleClass="p-button-help">История Промо</p-button></a>
+  <a [routerLink]="['/admin/wallets']"><p-button styleClass="p-button-help">Кошельки</p-button></a>
+  <a [routerLink]="['/admin/users']"><p-button styleClass="p-button-help">Пользователи</p-button></a>
+  <a [routerLink]="['/admin/settings']" *ngIf="isAdmin"><p-button
+      styleClass="p-button-help">Настройки</p-button></a>
+  <!-- <p-button label="Привязать api" (click)="toggleApiForm()" *ngIf="isSuperAdmin"></p-button> -->
+  <!-- <p-button label="Показать 'пустые' аккаунты" (click)="showEmptyApi()"></p-button> -->
+</div>
+<router-outlet></router-outlet>
+<p-dialog header="Api key" [(visible)]="isAdd" [style]="{width: '50vw'}">
+  <app-api-form [email]="email" [isExisting]="true"></app-api-form>
+</p-dialog>
+<p-dialog header="Пустые аккаунты" [(visible)]="isShowEmpty" [style]="{width: '50vw'}">
+  <app-show-empty></app-show-empty>
+</p-dialog>

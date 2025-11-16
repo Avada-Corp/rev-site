@@ -1,0 +1,436 @@
+<!-- Панель массовых операций - всегда закреплена вверху -->
+<div class="bulk-actions-panel" *ngIf="isSuperAdmin && getSelectedApiKeysCount() > 0">
+  <div class="bulk-actions-info">
+    <span>Выбрано API ключей: {{getSelectedApiKeysCount()}}</span>
+    <div *ngIf="loading" class="bulk-actions-loading">
+      <i class="pi pi-spin pi-spinner"></i>
+      <span>{{bulkOperationProgress?.currentOperation || 'Выполняются массовые операции...'}}</span>
+      <span *ngIf="bulkOperationProgress" class="bulk-progress">
+        ({{bulkOperationProgress.processed}}/{{bulkOperationProgress.total}})
+      </span>
+    </div>
+  </div>
+  <div class="bulk-actions-buttons">
+    <p-button icon="pi pi-play" label="Запустить всех выбранных" styleClass="p-button-success"
+      (click)="onBulkStartBots()" [disabled]="loading">
+    </p-button>
+    <p-button icon="pi pi-pause" label="Остановить всех выбранных" styleClass="p-button-danger"
+      (click)="onBulkStopBots()" [disabled]="loading">
+    </p-button>
+    <p-button icon="pi pi-database" label="Актуализировать всех выбранных" styleClass="p-button-warning"
+      (click)="onBulkActualizeBots()" [disabled]="loading">
+    </p-button>
+    <p-button icon="pi pi-sliders-v" label="Актуализировать без старта всех выбранных" styleClass="p-button-warning"
+      (click)="onBulkActualizeBotsNotStart()" [disabled]="loading">
+    </p-button>
+    <p-button icon="pi pi-times" label="Очистить выбор" styleClass="p-button-secondary" (click)="clearSelection()"
+      [disabled]="loading">
+    </p-button>
+  </div>
+</div>
+
+<!-- Основной контент с отступом когда показана панель -->
+<div [ngClass]="{'content-with-fixed-panel': isSuperAdmin && getSelectedApiKeysCount() > 0}">
+  <div class="api-table-header">
+    <div class="controls-row" *ngIf="isSuperAdmin">
+      <p-checkbox name="groupname" [binary]="true" label="Показывать ключи" [(ngModel)]="isShowApi"
+        (click)="showApiClick()">
+      </p-checkbox>
+      <p-button label="Выбрать всех" (click)="onSelectAllUsersClick()" [disabled]="loading">
+      </p-button>
+      <p-button label="Дернуть рубильник" icon="pi pi-bolt" styleClass="p-button-danger ml-2"
+        (click)="onRubilnikClick()"></p-button>
+    </div>
+    <div class="search-container">
+      <span class="p-input-icon-left">
+        <i class="pi pi-search"></i>
+        <input type="text" pInputText placeholder="Поиск по email, username или рефералу..."
+          [formControl]="searchControl" class="search-input" />
+      </span>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <p-table [value]="filteredUsers" dataKey="username" rowGroupMode="subheader" groupRowsBy="username"
+      [tableStyle]="{'min-width': '70rem'}">
+      <ng-template pTemplate="header">
+        <tr>
+          <th *ngIf="isSuperAdmin">Выбор</th>
+          <th *ngIf="isSuperAdmin">Actualize</th>
+          <th>Update</th>
+          <th style="min-width:300px">Manage</th>
+          <th>Status</th>
+          <th>Balance</th>
+          <th>Commissions</th>
+          <th>started/stopped/wait for start/wait for stop</th>
+          <th>Email</th>
+          <th>Api name</th>
+          <th>Market</th>
+          <th *ngIf="isSuperAdmin">Bot api id</th>
+          <th>Bot count</th>
+          <th *ngIf="isShowApi">Key</th>
+          <th *ngIf="isShowApi">Secret</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="groupheader" let-user let-rowIndex="rowIndex" let-expanded="expanded">
+        <tr>
+          <td [attr.colspan]="getGroupHeaderColspan()">
+            <div class="custom-checkbox-container" *ngIf="isSuperAdmin">
+              <p-checkbox [binary]="true" [ngModel]="isUserFullySelected(user)"
+                (ngModelChange)="toggleUserSelection(user, $event)" [styleClass]="getUserCheckboxStyleClass(user)"
+                styleClass="user-selection-checkbox" [pTooltip]="getUserSelectionTooltip(user)" tooltipPosition="top">
+              </p-checkbox>
+            </div>
+            <button type="button" pButton pRipple [pRowToggler]="user"
+              class="p-button-text p-button-rounded p-button-plain mr-2"
+              [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></button>
+            <span class="font-bold ml-2">{{user.username}} (parent ref - {{user.parentRef}}<p-button icon="pi pi-pencil"
+                styleClass="p-button-rounded p-button-text" (click)="editParentRef(user)"></p-button>)
+              <span class="freeze-period-inline ml-2">
+                | заморозка: {{ user.freezePeriod ? user.freezePeriod + ' дней' : 'не задана' }}
+                <p-button icon="pi pi-pencil" size="small" styleClass="p-button-text p-button-rounded ml-1"
+                  pTooltip="Изменить срок заморозки" (click)="editUserFreezePeriod(user)"></p-button>
+              </span>
+              <span class="creditor-status-inline ml-2">
+                | кредит: <span [ngClass]="user.canWorkOnCredit ? 'text-success' : 'text-danger'">
+                  {{ user.canWorkOnCredit ? 'да' : 'нет' }}
+                </span>
+                <p-button icon="pi pi-pencil" size="small" styleClass="p-button-text p-button-rounded ml-1"
+                  pTooltip="Изменить статус кредитора" (click)="editUserCreditorStatus(user)"></p-button>
+              </span>
+            </span>
+          </td>
+          <td>
+            <span class="font-bold ml-2">
+              {{getCommissionText(user)}}</span><p-button class="flip" icon="pi pi-sort-alt-slash"
+              styleClass="p-button-rounded" (click)="flipCommission(user)"></p-button>
+          </td>
+          <!-- <td>
+        <span class="font-bold ml-2">Balance: {{getUserServiceBalance(user)}}, Ref balance:
+          {{getUserServiceRefBalance(user)}}</span>
+      </td> -->
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="groupfooter" let-user>
+        <tr class="p-rowgroup-footer">
+          <td>Bal - {{getUserBalance(user)}}USDT</td>
+          <td>Comm - {{getUserCommission(user)}}</td>
+          <td>
+            <p-button class="addBot" styleClass="p-button-success" (click)="setUserCommission(user)">
+              Set user</p-button>
+          </td>
+          <td>Ref:<br /> {{getRefPercent(user)}}</td>
+          <td>
+            <p-button class="addBot" styleClass="p-button-success" (click)="setRefPercent(user)">
+              Set ref</p-button>
+          </td>
+          <td [attr.colspan]="getTotalApiColspan()" style="text-align: right">Total Api</td>
+          <td>{{getApiCount(user)}}</td>
+          <td [attr.colspan]="getTotalBotsColspan()" style="text-align: right">Total bots</td>
+          <td>{{getBotsCount(user)}}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="rowexpansion" let-user>
+        <tr>
+          <td *ngIf="isSuperAdmin">
+            <p-checkbox [binary]="true" [ngModel]="selectedApiKeys.has(user.rev_id)"
+              (ngModelChange)="toggleApiKeySelection(user.rev_id, $event)" styleClass="api-key-selection-checkbox">
+            </p-checkbox>
+          </td>
+          <td class="two-buttons">
+            <p-button class="addBot" icon="pi pi-database" styleClass="p-button-warning"
+              (click)="controlApiService.actualizeBotsInfo(user)" *ngIf="isSuperAdmin"></p-button>
+            <p-button *ngIf="isSuperAdmin" class="addBot" icon="pi pi-sliders-v" styleClass="p-button-warning"
+              (click)="controlApiService.actualizeBotsNotStartInfo(user)"></p-button>
+            <p-button class="addBot" icon="pi pi-list" styleClass="p-button-info" (click)="showOpenPositions(user)">
+            </p-button>
+          </td>
+          <td> <p-button class="addBot" icon="pi pi-sync" styleClass="p-button-success"
+              (click)="controlApiService.updateBotsInfo(user)"></p-button></td>
+          <td class="mngBots">
+            <p-button class="addBot" icon="pi pi-pencil" styleClass="p-button-danger" (click)="editApi(user)">
+            </p-button>
+            <p-button class="addBot" icon="pi pi-times" styleClass="p-button-danger"
+              (click)="controlApiService.deleteApi(user)">
+            </p-button>
+            <p-button class="addBot" icon="pi pi-play" styleClass="p-button-success"
+              (click)="controlApiService.startApi(user)">
+            </p-button>
+            <p-button class="addBot" icon="pi pi-pause" styleClass="p-button-danger"
+              (click)="controlApiService.stopApi(user)">
+            </p-button>
+            <p-button class="addBot" icon="pi pi-circle" styleClass="p-button-danger"
+              (click)="controlApiService.fullStopApi(user)">
+            </p-button>
+            <p-button class="addBot" icon="pi pi-cog" styleClass="p-button-info"
+              (click)="openSetApiStrategyDialog(user)" pTooltip="Изменить стратегию">
+            </p-button>
+          </td>
+          <td>{{ user.status?.status || "Stopped" }}<span class="days-badge"
+              *ngIf="user.market === '42' && getDays(user) > 0" [ngClass]="{
+            'days-critical': getDays(user) < 15,
+            'days-warning': getDays(user) >= 15 && getDays(user) <= 30,
+            'days-good': getDays(user) > 30
+          }">{{getDays(user)}}</span></td>
+          <td>
+            {{getApiBalance(user)}} USDT
+          </td>
+          <td class="comm">
+            {{getApiCommission(user)}}
+            <p-button class="addBot" styleClass="p-button-success" (click)="setCommission(user)">
+              Set Api</p-button>
+          </td>
+          <td>
+            {{ user.status?.started || 0 }} / {{ user.status?.stopped || 0 }} / {{
+            user.status?.waitForStart || 0}} / {{
+            user.status?.waitForStop || 0 }}
+            <span *ngIf="user.strategyId" class="strategy-badge">
+              ({{ getStrategyName(user.strategyId) }})
+            </span>
+          </td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.name }}</td>
+          <td>{{ getMarketName(user.market) }}</td>
+          <td *ngIf="isSuperAdmin">{{ user.rev_id }}</td>
+          <td>{{user.botIds.length }}</td>
+          <td *ngIf="isShowApi">{{ user.key }}</td>
+          <td *ngIf="isShowApi">{{ user.secret }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+
+<!-- Индикатор загрузки
+<div *ngIf="loading" class="loading-indicator">
+  <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+  <span>Загрузка...</span>
+</div> -->
+
+<!-- Пагинация -->
+<div class="pagination-container" *ngIf="paginationMeta">
+  <div class="pagination-info">
+    <span>
+      Страница {{paginationMeta.page}} из {{paginationMeta.totalPages}}
+      (показано {{controlApiService.users.length}} ключей из {{paginationMeta.total}})
+    </span>
+  </div>
+
+  <div class="pagination-controls">
+    <p-button icon="pi pi-angle-double-left" styleClass="p-button-outlined"
+      [disabled]="!paginationMeta.hasPrev || loading" (click)="onPageChange(1)" pTooltip="Первая страница">
+    </p-button>
+
+    <p-button icon="pi pi-angle-left" styleClass="p-button-outlined" [disabled]="!paginationMeta.hasPrev || loading"
+      (click)="onPageChange(paginationMeta.page - 1)" pTooltip="Предыдущая страница">
+    </p-button>
+
+    <span class="page-input">
+      <input type="number" pInputText [value]="currentPage" (keyup.enter)="onPageInputChange($event)" [min]="1"
+        [max]="paginationMeta.totalPages" style="width: 60px; text-align: center;">
+    </span>
+
+    <p-button icon="pi pi-angle-right" styleClass="p-button-outlined" [disabled]="!paginationMeta.hasNext || loading"
+      (click)="onPageChange(paginationMeta.page + 1)" pTooltip="Следующая страница">
+    </p-button>
+
+    <p-button icon="pi pi-angle-double-right" styleClass="p-button-outlined"
+      [disabled]="!paginationMeta.hasNext || loading" (click)="onPageChange(paginationMeta.totalPages)"
+      pTooltip="Последняя страница">
+    </p-button>
+  </div>
+
+  <!-- <div class="page-size-selector">
+    <label>Записей на странице:</label>
+    <p-dropdown [options]="[{label: '10', value: 10}, {label: '100', value: 100}, {label: 'Все', value: 20000}]"
+      [(ngModel)]="pageSize" (onChange)="onPageChange(1)" optionLabel="label" optionValue="value" [showClear]="false">
+    </p-dropdown>
+  </div> -->
+</div>
+
+<p-dialog header="Api key" [(visible)]="isEditForm" [style]="{width: '50vw'}">
+  <app-edit-user-api *ngIf="api != null" (closeFormEvent)="closeApiForm()" [api]="api"></app-edit-user-api>
+</p-dialog>
+<p-dialog header="Api key" [(visible)]="isCommissionSet" [style]="{width: '50vw'}">
+  <app-update-commission *ngIf="apiCommission != null || userCommission != null" (closeFormEvent)="closeApiForm()"
+    [apiCommission]="apiCommission" [userCommission]="userCommission"></app-update-commission>
+</p-dialog>
+<p-dialog header="Ref Percent" [(visible)]="isRefSet" [style]="{width: '50vw'}">
+  <app-update-ref *ngIf="refInfo?.email != null" (closeFormEvent)="closeApiForm()" [refInfo]="refInfo"></app-update-ref>
+</p-dialog>
+
+<!-- Add dialog for open positions -->
+<p-dialog header="Открытые позиции: {{currentApiName}}" [(visible)]="isPositionsDialogVisible" [style]="{width: '90vw'}"
+  [modal]="true" [closable]="true" (onHide)="closePositionsDialog()">
+  <p-tabView>
+    <p-tabPanel header="Позиции">
+      <div class="positions-container">
+        <ng-container *ngIf="openPositions.positions.length > 0">
+          <p-table [value]="openPositions.positions" [tableStyle]="{'min-width': '100%'}" [responsive]="true"
+            [paginator]="true" [rows]="10" [showCurrentPageReport]="true">
+            <ng-template pTemplate="header">
+              <tr>
+                <th *ngIf="isSuperAdmin">Закрыть по рынку</th>
+                <th>Символ</th>
+                <th>Сторона</th>
+                <th>Размер</th>
+                <th>Размер в токенах</th>
+                <th>Цена входа</th>
+                <th>Текущая цена</th>
+                <th>Нереализованная прибыль</th>
+                <th>Цена ликвидации</th>
+                <th>Плечо</th>
+                <th>Тип маржи</th>
+                <th>Обновлено</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-position>
+              <tr>
+                <td *ngIf="isSuperAdmin">
+                  <p-button icon="pi pi-times-circle" styleClass="p-button-rounded p-button-danger"
+                    *ngIf="openedUser&&isSuperAdmin" (click)="closePositionMarket(position)"></p-button>
+                </td>
+                <td>{{position.symbol}}</td>
+                <td>{{position.side}}</td>
+                <td>{{position.size}}</td>
+                <td>{{position.amount}}</td>
+                <td>{{position.openPriceAvg}}</td>
+                <td>{{position.markPrice}}</td>
+                <td [ngClass]="{'profit': position.unRealizedProfit > 0, 'loss': position.unrealizedPL < 0}">
+                  {{position.unrealizedPL}}
+                </td>
+                <td>{{position.liquidationPrice}}</td>
+                <td>{{position.leverage}}x</td>
+                <td>{{position.marginType}}</td>
+                <td>{{formatDateFromTimestamp(position.updateTime)}}</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </ng-container>
+        <div *ngIf="!openPositions || openPositions.positions.length === 0" class="no-positions">
+          <p>Нет открытых позиций</p>
+        </div>
+      </div>
+    </p-tabPanel>
+    <p-tabPanel header="Ордера">
+      <div class="orders-container">
+        <div class="mb-3" *ngIf="openPositions.openOrders && openPositions.openOrders.length > 0">
+          <p-button [label]="'Отменить все ордера (' + openPositions.openOrders.length + ')'" icon="pi pi-times-circle"
+            styleClass="p-button-danger" *ngIf="isSuperAdmin" (click)="cancelAllOrders()"></p-button>
+        </div>
+        <ng-container *ngIf="openPositions.openOrders && openPositions.openOrders.length > 0">
+          <p-table [value]="openPositions.openOrders" [tableStyle]="{'min-width': '100%'}" [responsive]="true"
+            [paginator]="true" [rows]="10" [showCurrentPageReport]="true">
+            <ng-template pTemplate="header">
+              <tr>
+                <th *ngIf="isSuperAdmin">Отменить ордер</th>
+                <th>Символ</th>
+                <th>Сторона</th>
+                <th>Размер</th>
+                <th>Цена</th>
+                <th>Плечо</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-order>
+              <tr>
+                <td>
+                  <p-button icon="pi pi-times-circle" styleClass="p-button-rounded p-button-danger"
+                    *ngIf="openedUser&&isSuperAdmin" (click)="cancelOrder(order)"></p-button>
+                </td>
+                <td>{{order.symbol}}</td>
+                <td>{{order.side}}</td>
+                <td>{{order.amount}}</td>
+                <td>{{order.price}}</td>
+                <td>{{order.leverage}}</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </ng-container>
+        <div *ngIf="!openPositions.openOrders || openPositions.openOrders.length === 0" class="no-orders">
+          <p>Нет открытых ордеров</p>
+        </div>
+      </div>
+    </p-tabPanel>
+  </p-tabView>
+</p-dialog>
+
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+
+<p-dialog header="Изменить рефовода для {{currentEditingUser?.username || currentEditingUser?.email}}"
+  [(visible)]="isParentRefDialogVisible"
+  [style]="{width: '50vw', height: '40vh', display: 'flex', justifyContent: 'center'}" [modal]="true"
+  class="parent-ref-dialog">
+  <div class="flex flex-column justify-content-between h-full">
+    <p-dropdown [options]="controlApiService.allUsernames" [(ngModel)]="selectedParentRef"
+      placeholder="Выберите нового рефовода" [style]="{'width':'100%'}">
+    </p-dropdown>
+    <div class="flex justify-content-between">
+      <p-button label="Отмена" styleClass="p-button-secondary" (click)="closeParentRefDialog()"></p-button>
+      <p-button label="Сохранить" styleClass="p-button-primary" (click)="onParentRefChange()"></p-button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog header="Выбор пары" [(visible)]="isRubilnikDialogVisible" [style]="{width:'30vw'}">
+  <div class="rubilnik-buttons">
+    <ng-container *ngFor="let p of rubilnikPairs">
+      <p-button [label]="p" styleClass="p-button-info" (click)="onPairClick(p)"></p-button>
+    </ng-container>
+    <div *ngIf="rubilnikPairs.length===0" class="w-full text-center">Пар не найдено</div>
+  </div>
+</p-dialog>
+
+<!-- Диалог изменения срока заморозки пользователя -->
+<p-dialog
+  header="Изменить срок заморозки: {{currentEditingUserForFreeze?.username || currentEditingUserForFreeze?.email}}"
+  [(visible)]="isUserFreezePeriodDialogVisible"
+  [style]="{width: '50vw', height: '40vh', display: 'flex', justifyContent: 'center'}" [modal]="true"
+  class="user-freeze-period-dialog">
+  <div class="flex flex-column justify-content-between h-full" style="gap: 1rem;">
+    <div class="field">
+      <label for="userFreezePeriod">Срок заморозки аккаунта (дней):</label>
+      <input type="number" id="userFreezePeriod" pInputText [(ngModel)]="selectedUserFreezePeriod"
+        placeholder="Введите количество дней" class="w-full" min="1" max="365">
+      <small class="text-gray-500">Оставьте пустым для снятия заморозки</small>
+    </div>
+    <div class="flex justify-content-between">
+      <p-button label="Отмена" styleClass="p-button-secondary" (click)="closeUserFreezePeriodDialog()"></p-button>
+      <p-button label="Сохранить" styleClass="p-button-primary" (click)="onUserFreezePeriodChange()"
+        [disabled]="savingUserFreezePeriod"></p-button>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- Диалог изменения статуса кредитора пользователя -->
+<p-dialog
+  header="Изменить статус кредитора: {{currentEditingUserForCreditor?.username || currentEditingUserForCreditor?.email}}"
+  [(visible)]="isUserCreditorDialogVisible"
+  [style]="{width: '50vw', height: '40vh', display: 'flex', justifyContent: 'center'}" [modal]="true"
+  class="user-creditor-dialog">
+  <div class="flex flex-column justify-content-between h-full" style="gap: 1rem;">
+    <div class="field">
+      <label for="userCreditorStatus">Статус кредитора:</label>
+      <p-selectButton [options]="creditorOptions" [(ngModel)]="selectedUserCreditorStatus" [optionLabel]="'label'"
+        [optionValue]="'value'">
+      </p-selectButton>
+      <small class="text-gray-500 mt-2 block">
+        Определяет, может ли пользователь работать в кредит
+      </small>
+    </div>
+    <div class="flex justify-content-between">
+      <p-button label="Отмена" styleClass="p-button-secondary" (click)="closeUserCreditorDialog()"></p-button>
+      <p-button label="Сохранить" styleClass="p-button-primary" (click)="onUserCreditorStatusChange()"
+        [disabled]="savingUserCreditorStatus"></p-button>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- Диалог смены стратегии API -->
+<p-dialog header="Изменить стратегию для API: {{currentApiForStrategy?.name}}"
+  [(visible)]="isSetApiStrategyDialogVisible" [style]="{width: '600px', maxWidth: '90vw'}" [modal]="true"
+  [draggable]="false" [resizable]="false" (onHide)="closeSetApiStrategyDialog()">
+  <app-set-api-strategy-modal *ngIf="currentApiForStrategy" [email]="currentApiForStrategy.email"
+    [apiName]="currentApiForStrategy.name" (closeEvent)="closeSetApiStrategyDialog()">
+  </app-set-api-strategy-modal>
+</p-dialog>

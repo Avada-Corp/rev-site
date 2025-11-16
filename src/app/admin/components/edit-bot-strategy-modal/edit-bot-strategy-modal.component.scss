@@ -1,0 +1,54 @@
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px 0;
+
+  .form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    h4 {
+      color: #333;
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .strategy-input {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    .strategy-textarea {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    small.p-error {
+      color: #e24c4c;
+      font-size: 12px;
+    }
+  }
+}
+
+:host ::ng-deep {
+  .p-dialog-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .p-dialog-content {
+    padding: 20px;
+  }
+
+  .p-dialog-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #dee2e6;
+  }
+}

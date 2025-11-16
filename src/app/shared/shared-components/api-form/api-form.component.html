@@ -1,0 +1,50 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card-api">
+                <div class="text-center">
+                    <h1>{{api ? "Edit":"Add"}}</h1>
+                </div>
+                <form [formGroup]="form" (ngSubmit)="onSubmit()" class="formClass">
+                    <div *ngIf="!api" class="dfc mb-3">
+                        <span class="p-float-label">
+                            <input pInputText id="apiName" formControlName="apiName" />
+                            <label htmlFor="apiName">Api Name</label>
+                        </span>
+                    </div>
+                    <div *ngIf="!api">
+                        <p-dropdown formControlName="market" [options]="markets" optionLabel="name"></p-dropdown>
+                    </div>
+                    <div class="dfc mb-3">
+                        <span class="p-float-label">
+                            <input pInputText id="apiKey" formControlName="apiKey" />
+                            <label htmlFor="apiKey">Api Key</label>
+                        </span>
+                    </div>
+                    <div>
+                        <span class="p-float-label">
+                            <input pInputText id="secretKey" formControlName="secretKey" />
+                            <label htmlFor="secretKey">Api secret</label>
+                        </span>
+                    </div>
+                    <div *ngIf="isShowPassphrase()">
+                        <span class="p-float-label">
+                            <input pInputText id="passPhrase" formControlName="passPhrase" />
+                            <label htmlFor="passPhrase">Pass phrase</label>
+                        </span>
+                    </div>
+                    <div *ngIf="isExisting">
+                        <span class="p-float-label">
+                            <input pInputText id="uEmail" formControlName="uEmail" />
+                            <label htmlFor="uEmail">User email</label>
+                        </span>
+                    </div>
+                    <div class="mt-2">
+                        <button type="submit" class="btn btn-primary" [disabled]="!form.valid">Save
+                            key</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,49 @@
+.df {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.df > p-button {
+  margin-left: 10px;
+}
+.mngBots > p-button {
+  margin: 0 2px;
+}
+
+:host ::ng-deep .p-button.p-button-help {
+  background-color: #8b5cf6;
+  border-color: #8b5cf6;
+  transition: all 0.2s;
+}
+
+:host ::ng-deep .p-button.p-button-help:hover {
+  background-color: #7c3aed;
+  border-color: #7c3aed;
+  transform: translateY(-2px);
+}
+
+:host ::ng-deep .p-button {
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+:host ::ng-deep .p-dialog .p-dialog-header {
+  background-color: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+:host ::ng-deep .p-dialog .p-dialog-content {
+  padding: 20px;
+}
+
+:host ::ng-deep .p-toast .p-toast-message {
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}

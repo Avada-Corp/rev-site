@@ -1,0 +1,33 @@
+.lighted {
+	background-color: #d0e7e4 !important;
+}
+
+.controlBtns {
+	display: flex;
+}
+
+.dataBtns p-button:not(:first-child) {
+  margin-left: 10px;
+}
+
+.mngBots {
+	margin-left: 30px;
+
+  p-button:not(:first-child) {
+    margin-left: 10px;
+  }
+}
+
+.footerRow {
+	display: flex;
+	flex-direction: column;
+}
+
+.apiName {
+	color: blue;
+	cursor: pointer;
+
+	&:hover {
+		background-color: #ede8e8;
+	}
+}

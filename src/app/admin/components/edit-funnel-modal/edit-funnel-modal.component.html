@@ -1,0 +1,231 @@
+<p-dialog [header]="scene ? 'Редактирование сцены ' + scene.sceneId : 'Создание новой сцены'" [(visible)]="visible"
+  [modal]="true" [style]="{ width: '90vw', maxWidth: '1400px', height: '90vh' }" [closable]="true" [resizable]="true"
+  (onHide)="onHide()">
+  <form [formGroup]="sceneForm">
+    <div class="funnel-modal-content">
+      <div class="scene-item">
+        <div class="scene-content">
+          <!-- Scene ID -->
+          <div class="form-field">
+            <label>Scene ID <span class="required">*</span></label>
+            <input type="text" pInputText formControlName="sceneId" placeholder="Уникальный идентификатор сцены" />
+            <small class="error-text" *ngIf="
+                sceneForm.get('sceneId')?.invalid &&
+                sceneForm.get('sceneId')?.touched
+              ">
+              Обязательное поле
+            </small>
+          </div>
+
+          <!-- Welcome Text -->
+          <div class="form-field">
+            <label>Приветственный текст <span class="required">*</span></label>
+            <div class="textarea-with-formatting">
+              <div class="formatting-buttons">
+                <p-button label="B" styleClass="formatting-btn formatting-btn-bold" pTooltip="Жирный текст"
+                  (click)="applyFormatting('b')"></p-button>
+                <p-button label="S" styleClass="formatting-btn formatting-btn-strike" pTooltip="Зачеркнутый текст"
+                  (click)="applyFormatting('s')"></p-button>
+                <p-button label="U" styleClass="formatting-btn formatting-btn-underline" pTooltip="Подчеркнутый текст"
+                  (click)="applyFormatting('u')"></p-button>
+                <p-button icon="pi pi-link" styleClass="formatting-btn" pTooltip="Вставить ссылку"
+                  (click)="openLinkDialog('welcome')"></p-button>
+              </div>
+              <textarea #welcomeTextRef pInputTextarea formControlName="welcomeText" rows="10"
+                placeholder="Текст приветствия"></textarea>
+            </div>
+            <small class="error-text" *ngIf="
+                sceneForm.get('welcomeText')?.invalid &&
+                sceneForm.get('welcomeText')?.touched
+              ">
+              Обязательное поле
+            </small>
+          </div>
+
+          <!-- Welcome Buttons -->
+          <div class="form-section">
+            <div class="section-header">
+              <h4>Приветственные кнопки</h4>
+              <p-button icon="pi pi-plus" label="Добавить кнопку" styleClass="p-button-sm p-button-outlined"
+                (click)="addWelcomeButton()"></p-button>
+            </div>
+
+            <div class="buttons-list" formArrayName="welcomeButtons" *ngIf="getWelcomeButtonsArray().length > 0">
+              <div class="button-item" *ngFor="
+                  let buttonControl of getWelcomeButtonsArray().controls;
+                  let btnIdx = index
+                " [formGroupName]="btnIdx">
+                <div class="button-fields">
+                  <div class="form-field">
+                    <label>Текст кнопки <span class="required">*</span></label>
+                    <input type="text" pInputText formControlName="text" placeholder="Текст кнопки" />
+                  </div>
+                  <div class="form-field">
+                    <label>Target Scene ID <span class="required">*</span></label>
+                    <input type="text" pInputText formControlName="targetSceneId" placeholder="ID целевой сцены" />
+                  </div>
+                </div>
+                <p-button icon="pi pi-trash" styleClass="p-button-danger p-button-sm"
+                  (click)="removeWelcomeButton(btnIdx)" pTooltip="Удалить кнопку"></p-button>
+              </div>
+            </div>
+            <p class="empty-message" *ngIf="getWelcomeButtonsArray().length === 0">
+              Нет приветственных кнопок
+            </p>
+          </div>
+
+          <!-- Reminders -->
+          <div class="form-section">
+            <div class="section-header">
+              <h4>Напоминания</h4>
+              <p-button icon="pi pi-plus" label="Добавить напоминание" styleClass="p-button-sm p-button-outlined"
+                (click)="addReminder()"></p-button>
+            </div>
+
+            <div class="reminders-list" formArrayName="reminders" *ngIf="getRemindersArray().length > 0">
+              <div class="reminder-item" *ngFor="
+                  let reminderControl of getRemindersArray().controls;
+                  let remIdx = index
+                " [formGroupName]="remIdx">
+                <div class="reminder-header">
+                  <h5>Напоминание {{ remIdx + 1 }}</h5>
+                  <p-button icon="pi pi-trash" styleClass="p-button-danger p-button-sm" (click)="removeReminder(remIdx)"
+                    pTooltip="Удалить напоминание"></p-button>
+                </div>
+
+                <div class="reminder-content">
+                  <div class="timer-section">
+                    <label>Таймер <span class="required">*</span></label>
+                    <div class="timer-display" *ngIf="getCurrentTimerMs(remIdx) > 0">
+                      <i class="pi pi-clock"></i>
+                      <span>{{ formatTimerDisplay(getCurrentTimerMs(remIdx)) }}</span>
+                    </div>
+                    <div class="timer-inputs">
+                      <div class="timer-input-group">
+                        <label>Дни</label>
+                        <input type="number" pInputText formControlName="timerDays" placeholder="0" min="0"
+                          class="timer-input" />
+                      </div>
+                      <div class="timer-input-group">
+                        <label>Часы</label>
+                        <input type="number" pInputText formControlName="timerHours" placeholder="0" min="0" max="23"
+                          class="timer-input" />
+                      </div>
+                      <div class="timer-input-group">
+                        <label>Минуты</label>
+                        <input type="number" pInputText formControlName="timerMinutes" placeholder="0" min="0" max="59"
+                          class="timer-input" />
+                      </div>
+                      <div class="timer-input-group">
+                        <label>Секунды</label>
+                        <input type="number" pInputText formControlName="timerSeconds" placeholder="0" min="0" max="59"
+                          class="timer-input" />
+                      </div>
+                    </div>
+                    <small class="error-text" *ngIf="
+                        (reminderControl.get('timerDays')?.invalid ||
+                         reminderControl.get('timerHours')?.invalid ||
+                         reminderControl.get('timerMinutes')?.invalid ||
+                         reminderControl.get('timerSeconds')?.invalid) &&
+                        (reminderControl.get('timerDays')?.touched ||
+                         reminderControl.get('timerHours')?.touched ||
+                         reminderControl.get('timerMinutes')?.touched ||
+                         reminderControl.get('timerSeconds')?.touched)
+                      ">
+                      Проверьте корректность значений
+                    </small>
+                  </div>
+
+                  <div class="form-field">
+                    <label>Текст напоминания <span class="required">*</span></label>
+                    <div class="textarea-with-formatting">
+                      <div class="formatting-buttons">
+                        <p-button label="B" styleClass="formatting-btn formatting-btn-bold" pTooltip="Жирный текст"
+                          (click)="applyFormattingToReminder(remIdx, 'b')"></p-button>
+                        <p-button label="S" styleClass="formatting-btn formatting-btn-strike"
+                          pTooltip="Зачеркнутый текст" (click)="applyFormattingToReminder(remIdx, 's')"></p-button>
+                        <p-button label="U" styleClass="formatting-btn formatting-btn-underline"
+                          pTooltip="Подчеркнутый текст" (click)="applyFormattingToReminder(remIdx, 'u')"></p-button>
+                        <p-button icon="pi pi-link" styleClass="formatting-btn" pTooltip="Вставить ссылку"
+                          (click)="openLinkDialog('reminder', remIdx)"></p-button>
+                      </div>
+                      <textarea #reminderTextRef pInputTextarea formControlName="text" rows="7"
+                        placeholder="Текст напоминания"></textarea>
+                    </div>
+                  </div>
+
+                  <!-- Reminder Buttons -->
+                  <div class="form-subsection">
+                    <div class="section-header">
+                      <h5>Кнопки напоминания</h5>
+                      <p-button icon="pi pi-plus" label="Добавить кнопку" styleClass="p-button-sm p-button-outlined"
+                        (click)="addReminderButton(remIdx)"></p-button>
+                    </div>
+
+                    <div class="buttons-list" formArrayName="buttons"
+                      *ngIf="getReminderButtonsArray(remIdx).length > 0">
+                      <div class="button-item" *ngFor="
+                          let buttonControl of getReminderButtonsArray(remIdx)
+                            .controls;
+                          let btnIdx = index
+                        " [formGroupName]="btnIdx">
+                        <div class="button-fields">
+                          <div class="form-field">
+                            <label>Текст <span class="required">*</span></label>
+                            <input type="text" pInputText formControlName="text" placeholder="Текст кнопки" />
+                          </div>
+                          <div class="form-field">
+                            <label>Действие <span class="required">*</span></label>
+                            <input type="text" pInputText formControlName="action" placeholder="Действие кнопки" />
+                          </div>
+                        </div>
+                        <p-button icon="pi pi-trash" styleClass="p-button-danger p-button-sm"
+                          (click)="removeReminderButton(remIdx, btnIdx)" pTooltip="Удалить кнопку"></p-button>
+                      </div>
+                    </div>
+                    <p class="empty-message" *ngIf="getReminderButtonsArray(remIdx).length === 0">
+                      Нет кнопок
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="empty-message" *ngIf="getRemindersArray().length === 0">
+              Нет напоминаний
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Отмена" icon="pi pi-times" styleClass="p-button-text" (click)="onHide()"></p-button>
+    <p-button label="Сохранить" icon="pi pi-check" styleClass="p-button-primary" [loading]="loading"
+      (click)="onSave()"></p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- Диалог для вставки ссылки -->
+<p-dialog header="Вставить ссылку" [(visible)]="linkDialogVisible" [modal]="true" [style]="{ width: '600px' }"
+  [closable]="true" (onHide)="cancelLinkDialog()">
+  <div class="link-dialog-content">
+    <div class="form-field">
+      <label>URL ссылки <span class="required">*</span></label>
+      <input type="text" pInputText [(ngModel)]="linkUrl" placeholder="https://example.com" class="link-input" />
+    </div>
+    <div class="form-field">
+      <label>Текст ссылки</label>
+      <input type="text" pInputText [(ngModel)]="linkText"
+        placeholder="Текст ссылки (если пусто, будет использован URL)" class="link-input" />
+      <small class="hint-text" *ngIf="selectedTextForLink">
+        Выделенный текст будет использован как текст ссылки, если не указан другой
+      </small>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Отмена" icon="pi pi-times" styleClass="p-button-text" (click)="cancelLinkDialog()"></p-button>
+    <p-button label="Вставить" icon="pi pi-check" styleClass="p-button-primary" (click)="insertLink()"></p-button>
+  </ng-template>
+</p-dialog>

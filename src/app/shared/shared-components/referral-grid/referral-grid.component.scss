@@ -1,0 +1,13 @@
+.ref-list {
+	padding: 0;
+	margin: 15px 0;
+	&__item {
+		list-style: none;
+		.headline {
+			font-weight: 700;
+		}
+		&:not(:last-child) {
+			margin-bottom: 10px;
+		}
+	}
+}

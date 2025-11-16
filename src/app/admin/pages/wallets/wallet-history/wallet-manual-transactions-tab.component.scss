@@ -1,0 +1,17 @@
+// Стили для вкладки ручных транзакций
+.commission-explanation {
+  white-space: pre-line;
+  max-width: 500px;
+  word-wrap: break-word;
+}
+
+// Стили для подсветки положительных и отрицательных значений
+.positive-value {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.negative-value {
+  color: #dc3545;
+  font-weight: 600;
+}

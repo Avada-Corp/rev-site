@@ -1,0 +1,62 @@
+{
+  "name": "getter-site",
+  "version": "1.0.0",
+  "scripts": {
+    "config": "npx tsx set-env.ts",
+    "ng": "npm run config && ng",
+    "start": "npm run config && ng serve -o",
+    "build": "npm run config && node --max_old_space_size=8192 ./node_modules/@angular/cli/bin/ng build",
+    "build-prod": "npm run config && node --max_old_space_size=16384 ./node_modules/@angular/cli/bin/ng build --configuration production",
+    "start:dev": "npm run config && ng serve --host=127.0.0.1 --port 80 -o",
+    "build:prod": "npm run config && ng build --configuration production",
+    "watch": "npm run config && ng build --watch --configuration development"
+  },
+  "browser": {
+    "crypto": false
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "^16.0.0",
+    "@angular/cdk": "^16.0.2",
+    "@angular/common": "^16.0.0",
+    "@angular/compiler": "^16.0.0",
+    "@angular/core": "^16.0.0",
+    "@angular/forms": "^16.0.0",
+    "@angular/material": "^16.0.2",
+    "@angular/platform-browser": "^16.0.0",
+    "@angular/platform-browser-dynamic": "^16.0.0",
+    "@angular/router": "^16.0.0",
+    "@ngrx/effects": "^16.0.0",
+    "@ngrx/router-store": "^16.0.0",
+    "@ngrx/store": "^16.0.0",
+    "@ngrx/store-devtools": "^16.0.0",
+    "angular-telegram-login-widget": "^0.2.3",
+    "bcryptjs": "^2.4.3",
+    "chart.js": "^4.4.9",
+    "colors": "^1.4.0",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^16.4.7",
+    "file-saver": "^2.0.5",
+    "ngx-cookie-service": "^16.0.1",
+    "ngx-telegram-widget": "^14.0.0-e",
+    "ngx-toastr": "^16.2.0",
+    "primeicons": "^6.0.1",
+    "primeng": "^16.0.0-rc.1",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "tsx": "^4.19.2",
+    "xlsx": "^0.18.5",
+    "zone.js": "~0.13.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^16.0.1",
+    "@angular/cli": "~16.0.1",
+    "@angular/compiler-cli": "^16.0.0",
+    "@angular/localize": "^16.0.1",
+    "@types/bcryptjs": "^2.4.2",
+    "@types/file-saver": "^2.0.7",
+    "@types/jasmine": "~4.3.0",
+    "@types/xlsx": "^0.0.35",
+    "typescript": "~5.0.2"
+  }
+}

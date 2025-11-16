@@ -1,0 +1,99 @@
+// Стили для вкладки реферальных транзакций
+.commission-explanation {
+  white-space: pre-line;
+  max-width: 500px;
+  word-wrap: break-word;
+}
+
+// Стили для подсветки положительных и отрицательных значений
+.positive-value {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.negative-value {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+// Стили для группировки по месяцам
+.month-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  font-weight: 600;
+  pointer-events: none;
+
+  .month-title {
+    font-size: 16px;
+  }
+
+  .month-total {
+    font-size: 14px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: rgba(0, 123, 255, 0.1);
+  }
+}
+
+.no-data-message {
+  text-align: center;
+  padding: 20px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+// Стили для таблиц внутри accordion
+::ng-deep p-accordion {
+  .p-accordion-tab {
+    margin-bottom: 1rem;
+
+    .p-accordion-header {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+
+      .p-accordion-header-link {
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        width: 100%;
+        text-decoration: none;
+        color: inherit;
+
+        &:focus {
+          outline: none;
+          box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+      }
+
+      &:hover {
+        background-color: #e9ecef;
+      }
+    }
+
+    .p-accordion-content {
+      border: 1px solid #dee2e6;
+      border-top: none;
+      padding: 0;
+
+      .p-datatable {
+        margin: 0;
+        border: none;
+
+        .p-datatable-thead > tr > th {
+          background-color: #ffffff;
+          border-bottom: 1px solid #dee2e6;
+          font-size: 14px;
+          padding: 0.75rem;
+        }
+
+        .p-datatable-tbody > tr > td {
+          padding: 0.75rem;
+          font-size: 14px;
+        }
+      }
+    }
+  }
+}

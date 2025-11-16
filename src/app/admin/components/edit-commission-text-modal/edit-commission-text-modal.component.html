@@ -1,0 +1,47 @@
+<p-dialog header="Редактирование текста о расчете комиссии" [(visible)]="visible" [modal]="true"
+    [style]="{width: '70vw', height: '80vh'}" [closable]="true" [resizable]="false" (onHide)="onHide()"
+    (onShow)="onShow()">
+
+    <form [formGroup]="commissionForm">
+        <div class="modal-content">
+            <div class="variables-section">
+                <h4>Доступные переменные:</h4>
+                <div class="variables-grid">
+                    <p-button *ngFor="let variable of variables" [label]="variable.label" [icon]="'pi pi-plus'"
+                        styleClass="p-button-sm p-button-outlined" [pTooltip]="'Вставить ' + variable.key"
+                        (click)="insertVariable(variable)">
+                    </p-button>
+                </div>
+                <small class="help-text">
+                    Нажмите на кнопку переменной, чтобы вставить её в текст на месте курсора.
+                    Переменные будут автоматически окружены пробелами.
+                </small>
+            </div>
+
+            <div class="language-section">
+                <h4>Язык:</h4>
+                <p-dropdown [options]="languages" formControlName="language" optionLabel="label" optionValue="value"
+                    placeholder="Выберите язык" styleClass="language-dropdown"
+                    (onChange)="onLanguageChange($event.value)">
+                </p-dropdown>
+            </div>
+
+            <div class="text-section">
+                <h4>Текст:</h4>
+                <div class="textarea-container">
+                    <textarea #commissionTextarea formControlName="text" class="commission-textarea"
+                        placeholder="Введите текст с информацией о расчете комиссии..." rows="15">
+                    </textarea>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Отмена" icon="pi pi-times" styleClass="p-button-text" (click)="onHide()">
+        </p-button>
+        <p-button label="Сохранить" icon="pi pi-check" styleClass="p-button-primary" [loading]="loading"
+            (click)="onSave()">
+        </p-button>
+    </ng-template>
+</p-dialog>

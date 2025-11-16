@@ -1,0 +1,71 @@
+.cards {
+  margin: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.bots-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  position: relative;
+}
+
+.bots-all {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  min-height: 200px;
+  padding: 10px;
+}
+
+.addBot {
+  position: absolute;
+  top: -15px;
+  right: 15px;
+  z-index: 10;
+}
+
+.bot {
+  margin-bottom: 15px;
+  transition: transform 0.2s;
+}
+
+.bot:hover {
+  transform: translateY(-3px);
+}
+
+:host ::ng-deep .p-card {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+:host ::ng-deep .p-card .p-card-content {
+  padding: 0;
+}
+
+.saveBotOrder {
+  margin-top: 20px;
+}
+
+.example-box {
+  cursor: move;
+}
+
+.cdk-drag-preview {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  opacity: 0.8;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.3;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.example-list.cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}

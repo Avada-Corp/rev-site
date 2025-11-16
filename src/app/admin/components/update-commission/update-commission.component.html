@@ -1,0 +1,28 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card-api">
+                <div class="text-center">
+                    <h1>Edit commission for api {{apiCommission?.apiName || userCommission?.username}}</h1>
+                </div>
+                <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                    <div class="mb-3">
+                        <span class="p-float-label">
+                            <input pInputText id="percent" formControlName="percent" />
+                            <label htmlFor="percent">Percent, %</label>
+                        </span>
+                    </div>
+                    <div class="mb-3">
+                        <span class="p-float-label">
+                            <input pInputText id="absolute" formControlName="absolute" />
+                            <label htmlFor="absolute">Absolute, USDT</label>
+                        </span>
+                    </div>
+                    <div class="mt-2">
+                        <p-button type="submit" class="btn btn-primary" [disabled]="!form.valid">Save</p-button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

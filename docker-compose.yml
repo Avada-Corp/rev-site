@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: mynginx
+    ports:
+      - "80:80"
+      - "7425:7425"
+    volumes:
+      - /root/docker-nginx/html:/usr/share/nginx/html:ro
+      - /root/docker-nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - /root/docker-nginx/conf.d/ignat.conf:/etc/nginx/conf.d/ignat.conf:ro
+    restart: "no"
