@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { createEffect, Actions, ofType } from '@ngrx/effects';
-import { map, catchError, switchMap, tap } from 'rxjs/operators';
+import { map, catchError, switchMap, tap, mergeMap } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import { of } from 'rxjs';
 
@@ -117,19 +117,19 @@ export class SettingsEffect {
       ofType(getScenesAction),
       switchMap(() => {
         return this.adminService.getScenes().pipe(
-          map(({ status, data }) => {
+          map(({ status, data, errors }) => {
             if (status && data !== undefined) {
               return getScenesSuccessAction({ scenes: data });
             } else {
               return getScenesFailureAction({
-                errors: ['Failed to load scenes'],
+                errors: errors || ['Failed to load scenes'],
               });
             }
           }),
           catchError((errorResponse: HttpErrorResponse) => {
             return of(
               getScenesFailureAction({
-                errors: errorResponse.error.message || [
+                errors: errorResponse.error?.message || [
                   'Failed to load scenes',
                 ],
               })
@@ -194,26 +194,32 @@ export class SettingsEffect {
   updateScene$ = createEffect((): any =>
     this.actions$.pipe(
       ofType(updateSceneAction),
-      switchMap(({ scene }) => {
-        return this.adminService.updateScene(scene).pipe(
-          map(({ status, data }) => {
+      switchMap(({ scene, files }) => {
+        return this.adminService.updateScene(scene, files).pipe(
+          mergeMap(({ status, data }) => {
             if (status && data) {
               this.messageService.add({
                 severity: 'success',
                 summary: 'Успешно',
                 detail: 'Сцена обновлена',
               });
-              return updateSceneSuccessAction({ scene: data });
+              // Перезагружаем сцены для получения свежих превью
+              return [
+                updateSceneSuccessAction({ scene: data }),
+                getScenesAction(),
+              ];
             } else {
-              return updateSceneFailureAction({
-                errors: ['Failed to update scene'],
-              });
+              return of(
+                updateSceneFailureAction({
+                  errors: ['Failed to update scene'],
+                })
+              );
             }
           }),
           catchError((errorResponse: HttpErrorResponse) => {
             return of(
               updateSceneFailureAction({
-                errors: errorResponse.error.message || [
+                errors: errorResponse.error?.message || [
                   'Failed to update scene',
                 ],
               })
@@ -236,26 +242,32 @@ export class SettingsEffect {
   createScene$ = createEffect((): any =>
     this.actions$.pipe(
       ofType(createSceneAction),
-      switchMap(({ scene }) => {
-        return this.adminService.createScene(scene).pipe(
-          map(({ status, data }) => {
+      switchMap(({ scene, files }) => {
+        return this.adminService.createScene(scene, files).pipe(
+          mergeMap(({ status, data }) => {
             if (status && data) {
               this.messageService.add({
                 severity: 'success',
                 summary: 'Успешно',
                 detail: 'Сцена создана',
               });
-              return createSceneSuccessAction({ scene: data });
+              // Перезагружаем сцены для получения свежих превью
+              return [
+                createSceneSuccessAction({ scene: data }),
+                getScenesAction(),
+              ];
             } else {
-              return createSceneFailureAction({
-                errors: ['Failed to create scene'],
-              });
+              return of(
+                createSceneFailureAction({
+                  errors: ['Failed to create scene'],
+                })
+              );
             }
           }),
           catchError((errorResponse: HttpErrorResponse) => {
             return of(
               createSceneFailureAction({
-                errors: errorResponse.error.message || [
+                errors: errorResponse.error?.message || [
                   'Failed to create scene',
                 ],
               })

@@ -42,6 +42,26 @@
             </small>
           </div>
 
+          <!-- Welcome Image -->
+          <div class="form-field">
+            <label>Изображение для сцены</label>
+            <div class="image-upload-section">
+              <div class="image-preview" *ngIf="getWelcomeImagePreviewUrl()">
+                <img [src]="getWelcomeImagePreviewUrl()" alt="Preview" class="preview-image" />
+                <p-button icon="pi pi-trash" styleClass="p-button-danger p-button-sm remove-image-btn"
+                  (click)="removeWelcomeImage()" pTooltip="Удалить изображение"></p-button>
+              </div>
+              <div class="image-upload-controls">
+                <input type="file" #welcomeImageInput accept="image/*" (change)="onWelcomeImageSelected($event)"
+                  style="display: none;" />
+                <p-button *ngIf="!getWelcomeImagePreviewUrl()" icon="pi pi-upload" label="Загрузить изображение"
+                  styleClass="p-button-outlined" (click)="welcomeImageInput.click()"></p-button>
+                <p-button *ngIf="getWelcomeImagePreviewUrl()" icon="pi pi-refresh" label="Заменить изображение"
+                  styleClass="p-button-outlined p-button-sm" (click)="welcomeImageInput.click()"></p-button>
+              </div>
+            </div>
+          </div>
+
           <!-- Welcome Buttons -->
           <div class="form-section">
             <div class="section-header">
@@ -152,47 +172,65 @@
                       <textarea #reminderTextRef pInputTextarea formControlName="text" rows="7"
                         placeholder="Текст напоминания"></textarea>
                     </div>
-                  </div>
 
-                  <!-- Reminder Buttons -->
-                  <div class="form-subsection">
-                    <div class="section-header">
-                      <h5>Кнопки напоминания</h5>
-                      <p-button icon="pi pi-plus" label="Добавить кнопку" styleClass="p-button-sm p-button-outlined"
-                        (click)="addReminderButton(remIdx)"></p-button>
+                    <!-- Reminder Image -->
+                    <div class="form-field">
+                      <label>Изображение для напоминания</label>
+                      <div class="image-upload-section">
+                        <div class="image-preview" *ngIf="getReminderImagePreviewUrl(remIdx)">
+                          <img [src]="getReminderImagePreviewUrl(remIdx)" alt="Preview" class="preview-image" />
+                          <p-button icon="pi pi-trash" styleClass="p-button-danger p-button-sm remove-image-btn"
+                            (click)="removeReminderImage(remIdx)" pTooltip="Удалить изображение"></p-button>
+                        </div>
+                        <div class="image-upload-controls" *ngIf="!getReminderImagePreviewUrl(remIdx)">
+                          <input type="file" #reminderImageInput accept="image/*"
+                            (change)="onReminderImageSelected($event, remIdx)" style="display: none;" />
+                          <p-button icon="pi pi-upload" label="Загрузить изображение" styleClass="p-button-outlined"
+                            (click)="reminderImageInput.click()"></p-button>
+                        </div>
+                      </div>
                     </div>
 
-                    <div class="buttons-list" formArrayName="buttons"
-                      *ngIf="getReminderButtonsArray(remIdx).length > 0">
-                      <div class="button-item" *ngFor="
+                    <!-- Reminder Buttons -->
+                    <div class="form-subsection">
+                      <div class="section-header">
+                        <h5>Кнопки напоминания</h5>
+                        <p-button icon="pi pi-plus" label="Добавить кнопку" styleClass="p-button-sm p-button-outlined"
+                          (click)="addReminderButton(remIdx)"></p-button>
+                      </div>
+
+                      <div class="buttons-list" formArrayName="buttons"
+                        *ngIf="getReminderButtonsArray(remIdx).length > 0">
+                        <div class="button-item" *ngFor="
                           let buttonControl of getReminderButtonsArray(remIdx)
                             .controls;
                           let btnIdx = index
                         " [formGroupName]="btnIdx">
-                        <div class="button-fields">
-                          <div class="form-field">
-                            <label>Текст <span class="required">*</span></label>
-                            <input type="text" pInputText formControlName="text" placeholder="Текст кнопки" />
+                          <div class="button-fields">
+                            <div class="form-field">
+                              <label>Текст <span class="required">*</span></label>
+                              <input type="text" pInputText formControlName="text" placeholder="Текст кнопки" />
+                            </div>
+                            <div class="form-field">
+                              <label>Действие <span class="required">*</span></label>
+                              <input type="text" pInputText formControlName="action" placeholder="Действие кнопки" />
+                            </div>
                           </div>
-                          <div class="form-field">
-                            <label>Действие <span class="required">*</span></label>
-                            <input type="text" pInputText formControlName="action" placeholder="Действие кнопки" />
-                          </div>
+                          <p-button icon="pi pi-trash" styleClass="p-button-danger p-button-sm"
+                            (click)="removeReminderButton(remIdx, btnIdx)" pTooltip="Удалить кнопку"></p-button>
                         </div>
-                        <p-button icon="pi pi-trash" styleClass="p-button-danger p-button-sm"
-                          (click)="removeReminderButton(remIdx, btnIdx)" pTooltip="Удалить кнопку"></p-button>
                       </div>
+                      <p class="empty-message" *ngIf="getReminderButtonsArray(remIdx).length === 0">
+                        Нет кнопок
+                      </p>
                     </div>
-                    <p class="empty-message" *ngIf="getReminderButtonsArray(remIdx).length === 0">
-                      Нет кнопок
-                    </p>
                   </div>
                 </div>
+                <p class="empty-message" *ngIf="getRemindersArray().length === 0">
+                  Нет напоминаний
+                </p>
               </div>
             </div>
-            <p class="empty-message" *ngIf="getRemindersArray().length === 0">
-              Нет напоминаний
-            </p>
           </div>
         </div>
       </div>

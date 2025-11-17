@@ -15,6 +15,7 @@ import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import {
   Scene,
+  SceneWithPreview,
   WelcomeButton,
   Reminder,
 } from '../../store/types/adminState.interface';
@@ -26,10 +27,10 @@ import {
 })
 export class EditFunnelModalComponent implements OnInit, OnChanges {
   @Input() visible: boolean = false;
-  @Input() scene: Scene | null = null;
+  @Input() scene: SceneWithPreview | null = null;
   @Input() loading: boolean = false;
   @Output() visibleChange = new EventEmitter<boolean>();
-  @Output() save = new EventEmitter<Scene>();
+  @Output() save = new EventEmitter<{scene: Scene, files: {welcomeImage?: File, reminderImages: {[key: number]: File}}}>();
 
   @ViewChild('welcomeTextRef', { static: false })
   welcomeTextRef!: ElementRef<HTMLTextAreaElement>;
@@ -37,6 +38,11 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
   reminderTextRefs!: QueryList<ElementRef<HTMLTextAreaElement>>;
 
   sceneForm: FormGroup;
+
+  // Файлы изображений
+  welcomeImageFile: File | null = null;
+  reminderImageFiles: { [reminderIndex: number]: File | null } = {};
+  welcomeImageRemoved: boolean = false; // Флаг для отслеживания удаления изображения
 
   // Диалог для вставки ссылки
   linkDialogVisible: boolean = false;
@@ -90,6 +96,11 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
       sceneId: '',
       welcomeText: '',
     });
+
+    // Очистить файлы изображений
+    this.welcomeImageFile = null;
+    this.reminderImageFiles = {};
+    this.welcomeImageRemoved = false;
   }
 
   loadScene(): void {
@@ -115,6 +126,15 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
       sceneId: this.scene.sceneId,
       welcomeText: this.scene.welcomeText,
     });
+
+    // Загружаем URL изображений для отображения
+    // Всегда сбрасываем флаг удаления и файл при загрузке сцены
+    this.welcomeImageFile = null;
+    this.welcomeImageRemoved = false;
+    
+    // Отладочная информация
+    console.log('Loading scene:', this.scene.sceneId);
+    console.log('welcomeImageUrl:', this.scene.welcomeImageUrl);
 
     // Добавляем welcomeButtons
     if (this.scene.welcomeButtons) {
@@ -269,7 +289,7 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
 
     const reminders: Reminder[] = (
       this.sceneForm.get('reminders') as FormArray
-    ).controls.map((reminderControl) => {
+    ).controls.map((reminderControl, reminderIndex) => {
       const reminderForm = reminderControl as FormGroup;
       const buttons = (reminderForm.get('buttons') as FormArray).controls.map(
         (buttonControl) => {
@@ -295,6 +315,7 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
       return {
         timer: timerMs,
         text: reminderForm.get('text')?.value,
+        imageUrl: this.scene?.reminders[reminderIndex]?.imageUrl || undefined,
         buttons,
       };
     });
@@ -302,11 +323,26 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
     const scene: Scene = {
       sceneId: this.sceneForm.get('sceneId')?.value,
       welcomeText: this.sceneForm.get('welcomeText')?.value,
+      welcomeImageUrl: this.welcomeImageRemoved ? undefined : (this.scene?.welcomeImageUrl || undefined), // Очищаем URL если изображение удалено
       welcomeButtons,
       reminders,
     };
 
-    this.save.emit(scene);
+    // Собираем файлы для отправки
+    const files: {welcomeImage?: File, reminderImages: {[key: number]: File}} = {
+      welcomeImage: this.welcomeImageFile || undefined,
+      reminderImages: {}
+    };
+
+    // Добавляем файлы изображений напоминаний
+    Object.keys(this.reminderImageFiles).forEach(key => {
+      const index = parseInt(key);
+      if (this.reminderImageFiles[index]) {
+        files.reminderImages[index] = this.reminderImageFiles[index]!;
+      }
+    });
+
+    this.save.emit({scene, files});
   }
 
   // Конвертация миллисекунд в дни, часы, минуты, секунды
@@ -557,5 +593,71 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
     this.linkUrl = '';
     this.linkText = '';
     this.selectedTextForLink = '';
+  }
+
+  // Методы для работы с изображениями
+  onWelcomeImageSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.welcomeImageFile = file;
+      this.welcomeImageRemoved = false; // Сбрасываем флаг удаления при загрузке нового файла
+    }
+    // Очищаем input, чтобы можно было загрузить тот же файл снова
+    event.target.value = '';
+  }
+
+  onReminderImageSelected(event: any, reminderIndex: number): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.reminderImageFiles[reminderIndex] = file;
+    }
+  }
+
+  removeWelcomeImage(): void {
+    this.welcomeImageFile = null;
+    this.welcomeImageRemoved = true; // Помечаем, что изображение удалено
+  }
+
+  removeReminderImage(reminderIndex: number): void {
+    this.reminderImageFiles[reminderIndex] = null;
+  }
+
+  // Получить URL для превью изображения сцены
+  getWelcomeImagePreviewUrl(): string | null {
+    // Если изображение было удалено, не показываем превью
+    if (this.welcomeImageRemoved) {
+      return null;
+    }
+    // Если загружен новый файл, показываем его
+    if (this.welcomeImageFile) {
+      return URL.createObjectURL(this.welcomeImageFile);
+    }
+    // Если есть превью из существующей сцены, показываем его
+    if (this.scene?.welcomeImagePreviewUrl) {
+      return this.scene.welcomeImagePreviewUrl;
+    }
+    // Если нет превью, но есть URL изображения, используем его
+    const imageUrl = this.scene?.welcomeImageUrl;
+    if (imageUrl && imageUrl.trim() !== '') {
+      return imageUrl;
+    }
+    return null;
+  }
+
+  // Получить URL для превью изображения напоминания
+  getReminderImagePreviewUrl(reminderIndex: number): string | null {
+    // Если загружен новый файл, показываем его
+    if (this.reminderImageFiles[reminderIndex]) {
+      return URL.createObjectURL(this.reminderImageFiles[reminderIndex]!);
+    }
+    // Если есть превью из существующей сцены, показываем его
+    if (this.scene?.reminderImagePreviewUrls?.has(reminderIndex)) {
+      return this.scene.reminderImagePreviewUrls.get(reminderIndex) || null;
+    }
+    // Если нет превью, но есть URL изображения, используем его
+    if (this.scene?.reminders[reminderIndex]?.imageUrl) {
+      return this.scene.reminders[reminderIndex].imageUrl || null;
+    }
+    return null;
   }
 }

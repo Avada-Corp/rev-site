@@ -29,7 +29,7 @@ import {
 } from '../../store/actions/botStrategies.action';
 import { getBotsAction } from '../../store/actions/bots.action';
 import { Lang } from 'src/app/shared/types/lang.enum';
-import { BotStrategy, Bot, Scene } from '../../store/types/adminState.interface';
+import { BotStrategy, Bot, Scene, SceneWithPreview } from '../../store/types/adminState.interface';
 import { ConfirmationService } from 'primeng/api';
 
 interface StrategyWithMetrics extends BotStrategy {
@@ -48,7 +48,7 @@ export class SettingsComponent implements OnInit {
   isLoading$: Observable<boolean>;
   botStrategies$: Observable<BotStrategy[]>;
   bots$: Observable<Bot[]>;
-  scenes$: Observable<Scene[]>;
+  scenes$: Observable<SceneWithPreview[]>;
   isScenesLoading$: Observable<boolean>;
   vm$: Observable<{
     isSuperAdmin: boolean;
@@ -56,7 +56,7 @@ export class SettingsComponent implements OnInit {
     currentLanguage: string;
     isLoading: boolean;
     botStrategies: StrategyWithMetrics[];
-    scenes: Scene[];
+    scenes: SceneWithPreview[];
     isScenesLoading: boolean;
   }>;
 
@@ -65,7 +65,7 @@ export class SettingsComponent implements OnInit {
   isMoneyPolicyModalVisible = false;
   isCalculationsModalVisible = false;
   isFunnelModalVisible = false;
-  selectedScene: Scene | null = null;
+  selectedScene: SceneWithPreview | null = null;
   currentLanguage: string = 'ru';
   isSuperAdmin: boolean = false;
   selectedStrategy: StrategyWithMetrics | null = null;
@@ -120,7 +120,7 @@ export class SettingsComponent implements OnInit {
     });
   }
 
-  private sortScenes(scenes: Scene[]): Scene[] {
+  private sortScenes(scenes: SceneWithPreview[]): SceneWithPreview[] {
     return [...scenes].sort((a, b) => {
       // Сначала сцена с sceneId = "start"
       if (a.sceneId === 'start' && b.sceneId !== 'start') {
@@ -296,7 +296,7 @@ export class SettingsComponent implements OnInit {
     // Можно добавить дополнительную логику при изменении
   }
 
-  onEditFunnel(scene?: Scene) {
+  onEditFunnel(scene?: SceneWithPreview) {
     this.selectedScene = scene || null;
     this.isFunnelModalVisible = true;
     if (!scene) {
@@ -314,19 +314,21 @@ export class SettingsComponent implements OnInit {
     this.selectedScene = null;
   }
 
-  onSaveScene(updatedScene: Scene) {
+  onSaveScene(data: {scene: Scene, files: {welcomeImage?: File, reminderImages: {[key: number]: File}}}) {
+    const {scene, files} = data;
+
     if (this.selectedScene) {
-      // Редактирование существующей сцены - отправляем только эту сцену
-      this.store.dispatch(updateSceneAction({ scene: updatedScene }));
+      // Редактирование существующей сцены
+      this.store.dispatch(updateSceneAction({ scene, files }));
     } else {
       // Создание новой сцены
-      this.store.dispatch(createSceneAction({ scene: updatedScene }));
+      this.store.dispatch(createSceneAction({ scene, files }));
     }
     this.isFunnelModalVisible = false;
     this.selectedScene = null;
   }
 
-  onDeleteScene(scene: Scene) {
+  onDeleteScene(scene: SceneWithPreview) {
     this.confirmationService.confirm({
       message: `Вы уверены, что хотите удалить сцену "${scene.sceneId}"? Это действие нельзя отменить.`,
       header: 'Подтверждение удаления',

@@ -251,7 +251,7 @@ export interface AdminStateInterface {
   // Settings
   commissionTexts: { ru: string; en: string }; // Тексты с информацией о расчете комиссии по языкам
   isCommissionTextLoading: boolean;
-  scenes: Scene[]; // Сцены воронки
+  scenes: SceneWithPreview[]; // Сцены воронки с превью изображений
   isScenesLoading: boolean;
   // User commission report
   userCommissionReport: {
@@ -348,12 +348,22 @@ export interface ReminderButton {
 export interface Reminder {
   timer: number;
   text: string;
+  imageUrl?: string; // URL изображения на сервере
   buttons: ReminderButton[];
 }
 
 export interface Scene {
   sceneId: string;
   welcomeText: string;
+  welcomeImageUrl?: string; // URL изображения на сервере
   welcomeButtons: WelcomeButton[];
   reminders: Reminder[];
+}
+
+/**
+ * Сцена с превью изображений
+ */
+export interface SceneWithPreview extends Scene {
+  welcomeImagePreviewUrl?: string; // URL для превью welcome изображения
+  reminderImagePreviewUrls: Map<number, string>; // Map<reminderIndex, previewUrl>
 }

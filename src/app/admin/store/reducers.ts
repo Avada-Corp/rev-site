@@ -60,7 +60,7 @@ import {
   updateBotSuccessAction,
   updateBotFailureAction,
 } from './actions/botUpdate.action';
-import { AdminStateInterface } from './types/adminState.interface';
+import { AdminStateInterface, SceneWithPreview } from './types/adminState.interface';
 import {
   getBotSettingsAction,
   getBotSettingsFailureAction,
@@ -1211,11 +1211,22 @@ const adminReducer = createReducer(
   ),
   on(
     getScenesSuccessAction,
-    (state, { scenes }): AdminStateInterface => ({
-      ...state,
-      scenes,
-      isScenesLoading: false,
-    })
+    (state, { scenes }): AdminStateInterface => {
+      // Освобождаем старые URL превью перед заменой
+      state.scenes.forEach((oldScene) => {
+        if (oldScene.welcomeImagePreviewUrl) {
+          URL.revokeObjectURL(oldScene.welcomeImagePreviewUrl);
+        }
+        oldScene.reminderImagePreviewUrls.forEach((url) => {
+          URL.revokeObjectURL(url);
+        });
+      });
+      return {
+        ...state,
+        scenes,
+        isScenesLoading: false,
+      };
+    }
   ),
   on(
     getScenesFailureAction,
@@ -1233,11 +1244,28 @@ const adminReducer = createReducer(
   ),
   on(
     saveScenesSuccessAction,
-    (state, { scenes }): AdminStateInterface => ({
-      ...state,
-      scenes,
-      isScenesLoading: false,
-    })
+    (state, { scenes }): AdminStateInterface => {
+      // Освобождаем старые URL превью перед заменой
+      state.scenes.forEach((oldScene) => {
+        if (oldScene.welcomeImagePreviewUrl) {
+          URL.revokeObjectURL(oldScene.welcomeImagePreviewUrl);
+        }
+        oldScene.reminderImagePreviewUrls.forEach((url) => {
+          URL.revokeObjectURL(url);
+        });
+      });
+      // Преобразуем Scene[] в SceneWithPreview[]
+      const scenesWithPreviews: SceneWithPreview[] = scenes.map((scene) => ({
+        ...scene,
+        welcomeImagePreviewUrl: undefined,
+        reminderImagePreviewUrls: new Map(),
+      }));
+      return {
+        ...state,
+        scenes: scenesWithPreviews,
+        isScenesLoading: false,
+      };
+    }
   ),
   on(
     saveScenesFailureAction,
@@ -1259,9 +1287,17 @@ const adminReducer = createReducer(
     updateSceneSuccessAction,
     (state, { scene }): AdminStateInterface => ({
       ...state,
-      scenes: state.scenes.map((s) =>
-        s.sceneId === scene.sceneId ? scene : s
-      ),
+      // Преобразуем Scene в SceneWithPreview, сохраняя существующие превью если они есть
+      scenes: state.scenes.map((s) => {
+        if (s.sceneId === scene.sceneId) {
+          return {
+            ...scene,
+            welcomeImagePreviewUrl: s.welcomeImagePreviewUrl, // Сохраняем существующее превью
+            reminderImagePreviewUrls: s.reminderImagePreviewUrls, // Сохраняем существующие превью
+          };
+        }
+        return s;
+      }),
       isScenesLoading: false,
     })
   ),
@@ -1285,7 +1321,15 @@ const adminReducer = createReducer(
     createSceneSuccessAction,
     (state, { scene }): AdminStateInterface => ({
       ...state,
-      scenes: [...state.scenes, scene],
+      // Преобразуем Scene в SceneWithPreview
+      scenes: [
+        ...state.scenes,
+        {
+          ...scene,
+          welcomeImagePreviewUrl: undefined,
+          reminderImagePreviewUrls: new Map(),
+        },
+      ],
       isScenesLoading: false,
     })
   ),
@@ -1307,11 +1351,25 @@ const adminReducer = createReducer(
   ),
   on(
     deleteSceneSuccessAction,
-    (state, { sceneId }): AdminStateInterface => ({
-      ...state,
-      scenes: state.scenes.filter((s) => s.sceneId !== sceneId),
-      isScenesLoading: false,
-    })
+    (state, { sceneId }): AdminStateInterface => {
+      // Находим удаляемую сцену для освобождения URL превью
+      const sceneToDelete = state.scenes.find((s) => s.sceneId === sceneId);
+      if (sceneToDelete) {
+        // Освобождаем URL превью welcome изображения
+        if (sceneToDelete.welcomeImagePreviewUrl) {
+          URL.revokeObjectURL(sceneToDelete.welcomeImagePreviewUrl);
+        }
+        // Освобождаем URL превью reminder изображений
+        sceneToDelete.reminderImagePreviewUrls.forEach((url) => {
+          URL.revokeObjectURL(url);
+        });
+      }
+      return {
+        ...state,
+        scenes: state.scenes.filter((s) => s.sceneId !== sceneId),
+        isScenesLoading: false,
+      };
+    }
   ),
   on(
     deleteSceneFailureAction,

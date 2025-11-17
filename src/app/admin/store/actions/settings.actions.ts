@@ -3,7 +3,7 @@ import { createAction, props } from '@ngrx/store';
 import { BackendErrorsInterface } from 'src/app/shared/types/backendErrors.interface';
 import { Lang } from 'src/app/shared/types/lang.enum';
 import { ActionTypes } from '../actionTypes';
-import { Scene } from '../types/adminState.interface';
+import { Scene, SceneWithPreview } from '../types/adminState.interface';
 
 export const getCommissionTextAction = createAction(
   ActionTypes.GET_COMMISSION_TEXT
@@ -39,7 +39,7 @@ export const getScenesAction = createAction(ActionTypes.GET_SCENES);
 
 export const getScenesSuccessAction = createAction(
   ActionTypes.GET_SCENES_SUCCESS,
-  props<{ scenes: Scene[] }>()
+  props<{ scenes: SceneWithPreview[] }>()
 );
 
 export const getScenesFailureAction = createAction(
@@ -65,7 +65,7 @@ export const saveScenesFailureAction = createAction(
 // Update scene actions
 export const updateSceneAction = createAction(
   ActionTypes.UPDATE_SCENE,
-  props<{ scene: Scene }>()
+  props<{ scene: Scene, files: {welcomeImage?: File, reminderImages: {[key: number]: File}} }>()
 );
 
 export const updateSceneSuccessAction = createAction(
@@ -81,7 +81,7 @@ export const updateSceneFailureAction = createAction(
 // Create scene actions
 export const createSceneAction = createAction(
   ActionTypes.CREATE_SCENE,
-  props<{ scene: Scene }>()
+  props<{ scene: Scene, files: {welcomeImage?: File, reminderImages: {[key: number]: File}} }>()
 );
 
 export const createSceneSuccessAction = createAction(

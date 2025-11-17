@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import {
   GetterResponseInterface,
@@ -25,12 +25,15 @@ import {
   UpdatePartnerRequest,
   PartnersResponse,
   Scene,
+  SceneWithPreview,
 } from '../store/types/adminState.interface';
 import { BotSettings } from 'src/app/shared/types/botSettings.interface';
 import { PersistanceService } from 'src/app/shared/services/persistance.service';
-import { of } from 'rxjs';
+import { of, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { CommissionType } from '../shared';
 import { UserRole } from 'src/app/shared/types/userRole.enum';
+import { parseMultipartFormData } from 'src/app/shared/helpers/helpers';
 
 @Injectable()
 export class AdminService {
@@ -43,6 +46,14 @@ export class AdminService {
     const token = this.persistanceService.get('accessToken');
     return {
       Authorization: `Bearer ${token}`,
+    };
+  }
+
+  getHeadersWithoutContentType() {
+    const token = this.persistanceService.get('accessToken');
+    return {
+      Authorization: `Bearer ${token}`,
+      // Не указываем Content-Type, чтобы браузер сам установил multipart/form-data для FormData
     };
   }
 
@@ -626,11 +637,117 @@ export class AdminService {
   }
 
   // Scenes methods
-  getScenes() {
+  getScenes(): Observable<GetterResponseInterface<SceneWithPreview[]>> {
     const url = environment.apiUrl + '/admin/scenes';
-    return this.http.get<GetterResponseInterface<Scene[]>>(url, {
-      headers: this.getHeaders(),
-    });
+    return this.http
+      .get(url, {
+        headers: this.getHeaders(),
+        responseType: 'arraybuffer',
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          // Проверяем Content-Type для определения формата ответа
+          const contentType = response.headers.get('content-type') || '';
+          
+          // Если это не multipart, значит ошибка в формате JSON
+          if (!contentType.includes('multipart/form-data')) {
+            try {
+              const decoder = new TextDecoder();
+              const jsonText = decoder.decode(response.body || new ArrayBuffer(0));
+              const errorResponse = JSON.parse(jsonText);
+              return {
+                status: false,
+                errors: errorResponse.errors || ['Ошибка при получении списка сцен'],
+                messages: errorResponse.messages || [],
+                data: [] as SceneWithPreview[],
+              };
+            } catch (e) {
+              return {
+                status: false,
+                errors: ['Ошибка при обработке ответа сервера'],
+                messages: [],
+                data: [] as SceneWithPreview[],
+              };
+            }
+          }
+
+          // Извлекаем boundary из Content-Type
+          const boundaryMatch = contentType.match(/boundary=([^;]+)/);
+          if (!boundaryMatch) {
+            return {
+              status: false,
+              errors: ['Не удалось определить boundary в ответе'],
+              messages: [],
+              data: [] as SceneWithPreview[],
+            };
+          }
+
+          const boundary = boundaryMatch[1].trim();
+          const arrayBuffer = response.body || new ArrayBuffer(0);
+
+          // Парсим multipart/form-data
+          const parts = parseMultipartFormData(arrayBuffer, boundary);
+
+          let scenesData: Scene[] = [];
+          const imagesMap = new Map<string, Blob>();
+
+          // Разделяем данные и изображения
+          for (const part of parts) {
+            if (part.name === 'scenesData') {
+              const decoder = new TextDecoder();
+              const jsonText = decoder.decode(part.data);
+              try {
+                scenesData = JSON.parse(jsonText);
+              } catch (e) {
+                return {
+                  status: false,
+                  errors: ['Ошибка при парсинге JSON данных сцен'],
+                  messages: [],
+                  data: [] as SceneWithPreview[],
+                };
+              }
+            } else {
+              // Сохраняем изображения как Blob
+              imagesMap.set(part.name, new Blob([part.data], { type: part.type || 'image/jpeg' }));
+            }
+          }
+
+          // Собираем результат: для каждой сцены находим соответствующие изображения
+          const scenesWithPreviews: SceneWithPreview[] = scenesData.map((scene, sceneIndex) => {
+            const result: SceneWithPreview = {
+              ...scene,
+              reminderImagePreviewUrls: new Map(),
+            };
+
+            // Ищем welcomeImage для этой сцены
+            const welcomeImageKey = `welcomeImage_${sceneIndex}`;
+            if (imagesMap.has(welcomeImageKey)) {
+              result.welcomeImagePreviewUrl = URL.createObjectURL(imagesMap.get(welcomeImageKey)!);
+            }
+
+            // Ищем reminderImages для этой сцены
+            scene.reminders.forEach((_, reminderIndex) => {
+              const reminderImageKey = `reminderImage_${sceneIndex}_${reminderIndex}`;
+              if (imagesMap.has(reminderImageKey)) {
+                result.reminderImagePreviewUrls.set(
+                  reminderIndex,
+                  URL.createObjectURL(imagesMap.get(reminderImageKey)!)
+                );
+              }
+            });
+
+            return result;
+          });
+
+          return {
+            status: true,
+            errors: [],
+            messages: [],
+            data: scenesWithPreviews,
+          };
+        })
+      );
   }
 
   saveScenes(scenes: Scene[]) {
@@ -640,29 +757,58 @@ export class AdminService {
     });
   }
 
-  updateScene(scene: Scene) {
+  updateScene(scene: Scene, files: {welcomeImage?: File, reminderImages: {[key: number]: File}}) {
     const url = environment.apiUrl + '/admin/scene';
-    const data = {
-      sceneId: scene.sceneId,
-      welcomeText: scene.welcomeText,
-      welcomeButtons: scene.welcomeButtons,
-      reminders: scene.reminders,
-    };
-    return this.http.post<GetterResponseInterface<Scene>>(url, data, {
-      headers: this.getHeaders(),
+    const formData = new FormData();
+
+    // Добавляем данные сцены
+    formData.append('sceneId', scene.sceneId);
+    formData.append('welcomeText', scene.welcomeText);
+    formData.append('welcomeButtons', JSON.stringify(scene.welcomeButtons));
+    formData.append('reminders', JSON.stringify(scene.reminders));
+    
+    // Добавляем welcomeImageUrl, если он есть (для сохранения существующего URL)
+    if (scene.welcomeImageUrl) {
+      formData.append('welcomeImageUrl', scene.welcomeImageUrl);
+    }
+
+    // Добавляем файлы
+    if (files.welcomeImage) {
+      formData.append('welcomeImage', files.welcomeImage);
+    }
+
+    Object.keys(files.reminderImages).forEach(key => {
+      const index = parseInt(key);
+      formData.append(`reminderImage_${index}`, files.reminderImages[index]);
+    });
+
+    return this.http.post<GetterResponseInterface<Scene>>(url, formData, {
+      headers: this.getHeadersWithoutContentType(),
     });
   }
 
-  createScene(scene: Scene) {
+  createScene(scene: Scene, files: {welcomeImage?: File, reminderImages: {[key: number]: File}}) {
     const url = environment.apiUrl + '/admin/scenes/create';
-    const data = {
-      sceneId: scene.sceneId,
-      welcomeText: scene.welcomeText,
-      welcomeButtons: scene.welcomeButtons,
-      reminders: scene.reminders,
-    };
-    return this.http.post<GetterResponseInterface<Scene>>(url, data, {
-      headers: this.getHeaders(),
+    const formData = new FormData();
+
+    // Добавляем данные сцены
+    formData.append('sceneId', scene.sceneId);
+    formData.append('welcomeText', scene.welcomeText);
+    formData.append('welcomeButtons', JSON.stringify(scene.welcomeButtons));
+    formData.append('reminders', JSON.stringify(scene.reminders));
+
+    // Добавляем файлы
+    if (files.welcomeImage) {
+      formData.append('welcomeImage', files.welcomeImage);
+    }
+
+    Object.keys(files.reminderImages).forEach(key => {
+      const index = parseInt(key);
+      formData.append(`reminderImage_${index}`, files.reminderImages[index]);
+    });
+
+    return this.http.post<GetterResponseInterface<Scene>>(url, formData, {
+      headers: this.getHeadersWithoutContentType(),
     });
   }
 
