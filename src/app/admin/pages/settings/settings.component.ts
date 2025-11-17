@@ -329,8 +329,9 @@ export class SettingsComponent implements OnInit {
   }
 
   onDeleteScene(scene: SceneWithPreview) {
+    const sceneDisplayName = scene.name || scene.sceneId;
     this.confirmationService.confirm({
-      message: `Вы уверены, что хотите удалить сцену "${scene.sceneId}"? Это действие нельзя отменить.`,
+      message: `Вы уверены, что хотите удалить сцену "${sceneDisplayName}"? Это действие нельзя отменить.`,
       header: 'Подтверждение удаления',
       icon: 'pi pi-exclamation-triangle',
       acceptButtonStyleClass: 'p-button-danger',

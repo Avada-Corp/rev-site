@@ -763,6 +763,9 @@ export class AdminService {
 
     // Добавляем данные сцены
     formData.append('sceneId', scene.sceneId);
+    if (scene.name) {
+      formData.append('name', scene.name);
+    }
     formData.append('welcomeText', scene.welcomeText);
     formData.append('welcomeButtons', JSON.stringify(scene.welcomeButtons));
     formData.append('reminders', JSON.stringify(scene.reminders));
@@ -793,6 +796,9 @@ export class AdminService {
 
     // Добавляем данные сцены
     formData.append('sceneId', scene.sceneId);
+    if (scene.name) {
+      formData.append('name', scene.name);
+    }
     formData.append('welcomeText', scene.welcomeText);
     formData.append('welcomeButtons', JSON.stringify(scene.welcomeButtons));
     formData.append('reminders', JSON.stringify(scene.reminders));

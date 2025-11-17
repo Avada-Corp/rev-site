@@ -55,6 +55,7 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
   constructor(private fb: FormBuilder, private messageService: MessageService) {
     this.sceneForm = this.fb.group({
       sceneId: ['', [Validators.required]],
+      name: [''],
       welcomeText: ['', [Validators.required]],
       welcomeButtons: this.fb.array([]),
       reminders: this.fb.array([]),
@@ -94,6 +95,7 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
 
     this.sceneForm.patchValue({
       sceneId: '',
+      name: '',
       welcomeText: '',
     });
 
@@ -124,6 +126,7 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
     // Загружаем данные сцены
     this.sceneForm.patchValue({
       sceneId: this.scene.sceneId,
+      name: this.scene.name || '',
       welcomeText: this.scene.welcomeText,
     });
 
@@ -322,6 +325,7 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
 
     const scene: Scene = {
       sceneId: this.sceneForm.get('sceneId')?.value,
+      name: this.sceneForm.get('name')?.value || undefined,
       welcomeText: this.sceneForm.get('welcomeText')?.value,
       welcomeImageUrl: this.welcomeImageRemoved ? undefined : (this.scene?.welcomeImageUrl || undefined), // Очищаем URL если изображение удалено
       welcomeButtons,

@@ -30,13 +30,13 @@
 
         <div class="scenes-list-settings" *ngIf="vm.scenes && vm.scenes.length > 0">
             <div *ngFor="let scene of vm.scenes" class="scene-item-wrapper">
-                <p-button [label]="scene.sceneId" 
+                <p-button [label]="scene.name || scene.sceneId" 
                     icon="pi pi-pencil" styleClass="p-button-sm p-button-outlined scene-button"
-                    (click)="onEditFunnel(scene)" pTooltip="Редактировать сцену {{ scene.sceneId }}">
+                    (click)="onEditFunnel(scene)" [pTooltip]="'Редактировать сцену ' + (scene.name || scene.sceneId)">
                 </p-button>
                 <p-button icon="pi pi-trash" 
                     styleClass="p-button-sm p-button-danger p-button-outlined scene-delete-button"
-                    (click)="onDeleteScene(scene)" pTooltip="Удалить сцену {{ scene.sceneId }}">
+                    (click)="onDeleteScene(scene)" [pTooltip]="'Удалить сцену ' + (scene.name || scene.sceneId)">
                 </p-button>
             </div>
         </div>

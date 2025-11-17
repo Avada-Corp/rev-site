@@ -1,6 +1,6 @@
-<p-dialog [header]="scene ? 'Редактирование сцены ' + scene.sceneId : 'Создание новой сцены'" [(visible)]="visible"
-  [modal]="true" [style]="{ width: '90vw', maxWidth: '1400px', height: '90vh' }" [closable]="true" [resizable]="true"
-  (onHide)="onHide()">
+<p-dialog [header]="scene ? 'Редактирование сцены ' + (scene.name || scene.sceneId) : 'Создание новой сцены'"
+  [(visible)]="visible" [modal]="true" [style]="{ width: '90vw', maxWidth: '1400px', height: '90vh' }" [closable]="true"
+  [resizable]="true" (onHide)="onHide()">
   <form [formGroup]="sceneForm">
     <div class="funnel-modal-content">
       <div class="scene-item">
@@ -15,6 +15,13 @@
               ">
               Обязательное поле
             </small>
+          </div>
+
+          <!-- Name -->
+          <div class="form-field">
+            <label>Название сцены</label>
+            <input type="text" pInputText formControlName="name" placeholder="Название сцены (опционально)" />
+            <small class="hint-text">Если указано, будет отображаться вместо Scene ID</small>
           </div>
 
           <!-- Welcome Text -->

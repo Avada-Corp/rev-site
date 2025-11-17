@@ -354,6 +354,7 @@ export interface Reminder {
 
 export interface Scene {
   sceneId: string;
+  name?: string; // Название сцены (опционально)
   welcomeText: string;
   welcomeImageUrl?: string; // URL изображения на сервере
   welcomeButtons: WelcomeButton[];

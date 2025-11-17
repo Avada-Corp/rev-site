@@ -2,6 +2,9 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { AdminService } from '../../services/admin.service';
 import { MessageService } from 'primeng/api';
+import { Store } from '@ngrx/store';
+import { scenesSelector } from '../../store/selectors';
+import { getScenesAction } from '../../store/actions/settings.actions';
 
 interface UserInteraction {
   _id: string;
@@ -27,6 +30,7 @@ interface UserInteraction {
 
 interface SceneGroup {
   sceneId: string;
+  sceneName?: string;
   sceneText?: string;
   isExpanded: boolean;
   users: Array<{
@@ -53,14 +57,33 @@ export class PromoHistoryComponent implements OnInit, OnDestroy {
 
   sceneGroups: SceneGroup[] = [];
   uniqueChatIds: number[] = [];
+  scenesMap: Map<string, string> = new Map(); // Map<sceneId, name>
 
   constructor(
     private adminService: AdminService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private store: Store
   ) {}
 
   ngOnInit() {
+    // Загружаем сцены для получения name
+    this.store.dispatch(getScenesAction());
+    
     this.loadAllInteractions();
+    
+    // Подписываемся на изменения сцен
+    this.store.select(scenesSelector).pipe(takeUntil(this.destroy$)).subscribe(scenes => {
+      this.scenesMap.clear();
+      scenes.forEach(scene => {
+        if (scene.name) {
+          this.scenesMap.set(scene.sceneId, scene.name);
+        }
+      });
+      // Обновляем группы сцен, если они уже загружены
+      if (this.sceneGroups.length > 0) {
+        this.updateSceneGroupsNames();
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -135,7 +158,8 @@ export class PromoHistoryComponent implements OnInit, OnDestroy {
     this.sceneGroups = Array.from(sceneMap.entries()).map(([sceneId, userMap]) => {
       return {
         sceneId,
-        sceneText: sceneId,
+        sceneName: this.scenesMap.get(sceneId),
+        sceneText: this.scenesMap.get(sceneId) || sceneId,
         isExpanded: false,
         users: Array.from(userMap.entries())
           .map(([chatId, data]) => {
@@ -156,6 +180,16 @@ export class PromoHistoryComponent implements OnInit, OnDestroy {
 
     // Сортируем группы по количеству пользователей
     this.sceneGroups.sort((a, b) => b.users.length - a.users.length);
+  }
+
+  updateSceneGroupsNames() {
+    this.sceneGroups.forEach(group => {
+      const name = this.scenesMap.get(group.sceneId);
+      if (name) {
+        group.sceneName = name;
+        group.sceneText = name;
+      }
+    });
   }
 
   switchToUserView(chatId: number) {
@@ -243,6 +277,11 @@ export class PromoHistoryComponent implements OnInit, OnDestroy {
     if (!username) return null;
     const cleanUsername = username.replace('@', '');
     return `https://t.me/${cleanUsername}`;
+  }
+
+  getSceneDisplayName(sceneId?: string): string | undefined {
+    if (!sceneId) return undefined;
+    return this.scenesMap.get(sceneId) || sceneId;
   }
 }
 

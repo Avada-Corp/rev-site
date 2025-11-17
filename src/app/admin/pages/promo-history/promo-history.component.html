@@ -47,7 +47,7 @@
         <div class="scene-group-header" (click)="toggleSceneGroup(group)" style="cursor: pointer;">
           <div class="scene-header-content">
             <span class="expand-icon">{{ group.isExpanded ? '▼' : '▶' }}</span>
-            <h3>Сцена: {{ group.sceneId }}</h3>
+            <h3>Сцена: {{ group.sceneName || group.sceneId }}</h3>
           </div>
           <span class="badge badge-info">
             {{ group.users.length }} {{ group.users.length === 1 ? 'пользователь' : 'пользователей' }}
@@ -147,7 +147,7 @@
             <td>{{ formatDate(interaction.createdAt) }}</td>
             <td>
               <div *ngIf="interaction.type === 'scene_view'">
-                <strong>ID:</strong> {{ interaction.sceneId || 'N/A' }}<br />
+                <strong>Сцена:</strong> {{ getSceneDisplayName(interaction.sceneId) || 'N/A' }}<br />
                 <span *ngIf="interaction.sceneText" class="scene-text">
                   {{ interaction.sceneText }}
                 </span>
