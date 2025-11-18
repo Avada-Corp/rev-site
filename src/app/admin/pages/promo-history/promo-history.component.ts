@@ -10,7 +10,7 @@ interface UserInteraction {
   _id: string;
   chatId: number;
   username?: string;
-  type: 'scene_view' | 'reminder_sent' | 'reminder_read';
+  type: 'scene_view' | 'reminder_sent' | 'reminder_read' | 'button_click';
   sceneId?: string;
   sceneText?: string;
   sceneButtons?: Array<{
@@ -24,6 +24,11 @@ interface UserInteraction {
   sentAt?: Date;
   isRead?: boolean;
   readAt?: Date;
+  // Поля для нажатий кнопок
+  buttonId?: string;
+  buttonText?: string;
+  sourceSceneId?: string;
+  reminderTimer?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -54,10 +59,21 @@ export class PromoHistoryComponent implements OnInit, OnDestroy {
   viewMode: 'grouped' | 'user' = 'grouped';
   selectedChatId: number | null = null;
   userInteractions: UserInteraction[] = [];
+  filteredUserInteractions: UserInteraction[] = [];
 
   sceneGroups: SceneGroup[] = [];
   uniqueChatIds: number[] = [];
   scenesMap: Map<string, string> = new Map(); // Map<sceneId, name>
+
+  // Фильтр по типу взаимодействия
+  interactionTypeFilter: string = 'all';
+  interactionTypeOptions = [
+    { label: 'Все', value: 'all' },
+    { label: 'Просмотры сцен', value: 'scene_view' },
+    { label: 'Отправленные напоминания', value: 'reminder_sent' },
+    { label: 'Прочитанные напоминания', value: 'reminder_read' },
+    { label: 'Нажатия кнопок', value: 'button_click' },
+  ];
 
   constructor(
     private adminService: AdminService,
@@ -218,7 +234,10 @@ export class PromoHistoryComponent implements OnInit, OnDestroy {
               (a, b) =>
                 new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             );
+            this.applyInteractionFilter();
           } else {
+            this.userInteractions = [];
+            this.filteredUserInteractions = [];
             this.messageService.add({
               severity: 'error',
               summary: 'Ошибка',
@@ -229,6 +248,8 @@ export class PromoHistoryComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Ошибка загрузки истории пользователя:', error);
+          this.userInteractions = [];
+          this.filteredUserInteractions = [];
           this.messageService.add({
             severity: 'error',
             summary: 'Ошибка',
@@ -239,10 +260,26 @@ export class PromoHistoryComponent implements OnInit, OnDestroy {
       });
   }
 
+  applyInteractionFilter() {
+    if (this.interactionTypeFilter === 'all') {
+      this.filteredUserInteractions = this.userInteractions;
+    } else {
+      this.filteredUserInteractions = this.userInteractions.filter(
+        (interaction) => interaction.type === this.interactionTypeFilter
+      );
+    }
+  }
+
+  onFilterChange() {
+    this.applyInteractionFilter();
+  }
+
   backToGroupedView() {
     this.viewMode = 'grouped';
     this.selectedChatId = null;
     this.userInteractions = [];
+    this.filteredUserInteractions = [];
+    this.interactionTypeFilter = 'all';
   }
 
   formatDate(date: Date | string): string {
@@ -261,6 +298,7 @@ export class PromoHistoryComponent implements OnInit, OnDestroy {
       scene_view: 'Просмотр сцены',
       reminder_sent: 'Отправлено напоминание',
       reminder_read: 'Прочитано напоминание',
+      button_click: 'Нажатие кнопки',
     };
     return labels[type] || type;
   }
@@ -282,6 +320,22 @@ export class PromoHistoryComponent implements OnInit, OnDestroy {
   getSceneDisplayName(sceneId?: string): string | undefined {
     if (!sceneId) return undefined;
     return this.scenesMap.get(sceneId) || sceneId;
+  }
+
+  formatReminderTimer(timer?: number): string {
+    if (!timer) return '';
+    const minutes = Math.floor(timer / 60000);
+    const hours = Math.floor(minutes / 60);
+    if (hours > 0) {
+      return `${hours} ч ${minutes % 60} мин`;
+    }
+    return `${minutes} мин`;
+  }
+
+  isButtonFromReminder(interaction: UserInteraction): boolean {
+    return interaction.type === 'button_click' && 
+           interaction.reminderTimer !== undefined && 
+           interaction.reminderTimer !== null;
   }
 }
 

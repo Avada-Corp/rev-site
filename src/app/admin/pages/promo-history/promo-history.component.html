@@ -114,16 +114,28 @@
           {{ getUserDisplayName(selectedChatId || 0, getCurrentUserUsername()) }}
         </span>
       </h3>
-      <p class="info-text">
-        Всего записей: <strong>{{ userInteractions.length }}</strong>
-      </p>
+      <div class="filter-section">
+        <p class="info-text">
+          Всего записей: <strong>{{ userInteractions.length }}</strong>
+          <span *ngIf="interactionTypeFilter !== 'all'">
+            (отфильтровано: <strong>{{ filteredUserInteractions.length }}</strong>)
+          </span>
+        </p>
+        <p-dropdown
+          [options]="interactionTypeOptions"
+          [(ngModel)]="interactionTypeFilter"
+          (onChange)="onFilterChange()"
+          placeholder="Фильтр по типу"
+          [style]="{ width: '250px' }"
+        ></p-dropdown>
+      </div>
     </div>
 
-    <div *ngIf="userInteractions.length === 0" class="empty-state">
+    <div *ngIf="filteredUserInteractions.length === 0" class="empty-state">
       <p>Нет данных о взаимодействиях для этого пользователя</p>
     </div>
 
-    <div *ngIf="userInteractions.length > 0" class="interactions-table">
+    <div *ngIf="filteredUserInteractions.length > 0" class="interactions-table">
       <table class="table table-striped table-hover">
         <thead>
           <tr>
@@ -134,12 +146,13 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let interaction of userInteractions">
+          <tr *ngFor="let interaction of filteredUserInteractions">
             <td>
               <span class="badge" [ngClass]="{
                 'badge-primary': interaction.type === 'scene_view',
                 'badge-success': interaction.type === 'reminder_sent',
-                'badge-info': interaction.type === 'reminder_read'
+                'badge-info': interaction.type === 'reminder_read',
+                'badge-warning': interaction.type === 'button_click'
               }">
                 {{ getTypeLabel(interaction.type) }}
               </span>
@@ -157,6 +170,12 @@
                   {{ interaction.reminderText }}
                 </span>
                 <span *ngIf="!interaction.reminderText">N/A</span>
+              </div>
+              <div *ngIf="interaction.type === 'button_click'">
+                <strong>Кнопка:</strong> {{ interaction.buttonText || interaction.buttonId || 'N/A' }}<br />
+                <small *ngIf="interaction.buttonId && interaction.buttonId !== interaction.buttonText">
+                  ID: {{ interaction.buttonId }}
+                </small>
               </div>
             </td>
             <td>
@@ -180,6 +199,26 @@
                 <small *ngIf="interaction.isRead !== undefined">
                   Статус: {{ interaction.isRead ? 'Прочитано' : 'Не прочитано' }}
                 </small>
+              </div>
+              <div *ngIf="interaction.type === 'button_click'">
+                <small *ngIf="interaction.sourceSceneId">
+                  <strong>Источник:</strong> {{ getSceneDisplayName(interaction.sourceSceneId) || interaction.sourceSceneId }}
+                </small>
+                <div *ngIf="isButtonFromReminder(interaction)" class="reminder-info">
+                  <small>
+                    <strong>Из напоминалки:</strong> {{ formatReminderTimer(interaction.reminderTimer) }}
+                  </small>
+                </div>
+                <div *ngIf="!isButtonFromReminder(interaction)" class="scene-info">
+                  <small>
+                    <strong>Из сцены</strong>
+                  </small>
+                </div>
+                <div *ngIf="interaction.clickedAt" class="click-time">
+                  <small>
+                    Нажато: {{ formatDate(interaction.clickedAt) }}
+                  </small>
+                </div>
               </div>
             </td>
           </tr>
