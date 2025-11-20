@@ -43,6 +43,7 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
   welcomeImageFile: File | null = null;
   reminderImageFiles: { [reminderIndex: number]: File | null } = {};
   welcomeImageRemoved: boolean = false; // Флаг для отслеживания удаления изображения
+  reminderImagesRemoved: Set<number> = new Set(); // Флаги для отслеживания удаления изображений напоминаний
 
   // Диалог для вставки ссылки
   linkDialogVisible: boolean = false;
@@ -103,6 +104,7 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
     this.welcomeImageFile = null;
     this.reminderImageFiles = {};
     this.welcomeImageRemoved = false;
+    this.reminderImagesRemoved.clear();
   }
 
   loadScene(): void {
@@ -131,9 +133,10 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
     });
 
     // Загружаем URL изображений для отображения
-    // Всегда сбрасываем флаг удаления и файл при загрузке сцены
+    // Всегда сбрасываем флаги удаления и файлы при загрузке сцены
     this.welcomeImageFile = null;
     this.welcomeImageRemoved = false;
+    this.reminderImagesRemoved.clear();
     
     // Отладочная информация
     console.log('Loading scene:', this.scene.sceneId);
@@ -315,19 +318,36 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
         seconds
       );
 
+      // Сохраняем imageUrl только если изображение не было удалено
+      // Если загружен новый файл, imageUrl будет перезаписан на сервере
+      // Если изображение удалено (reminderImagesRemoved), очищаем imageUrl
+      // Если ничего не изменилось, сохраняем существующий imageUrl
+      let imageUrl: string | undefined;
+      if (this.reminderImagesRemoved.has(reminderIndex)) {
+        imageUrl = undefined; // Изображение удалено
+      } else {
+        // Сохраняем существующий URL, если нет нового файла
+        imageUrl = this.scene?.reminders[reminderIndex]?.imageUrl || undefined;
+      }
+
       return {
         timer: timerMs,
         text: reminderForm.get('text')?.value,
-        imageUrl: this.scene?.reminders[reminderIndex]?.imageUrl || undefined,
+        imageUrl,
         buttons,
       };
     });
+
+    // Определяем welcomeImageUrl: сохраняем существующий URL, если изображение не удалено
+    const welcomeImageUrl = this.welcomeImageRemoved 
+      ? undefined 
+      : (this.scene?.welcomeImageUrl || undefined);
 
     const scene: Scene = {
       sceneId: this.sceneForm.get('sceneId')?.value,
       name: this.sceneForm.get('name')?.value || undefined,
       welcomeText: this.sceneForm.get('welcomeText')?.value,
-      welcomeImageUrl: this.welcomeImageRemoved ? undefined : (this.scene?.welcomeImageUrl || undefined), // Очищаем URL если изображение удалено
+      welcomeImageUrl, // Сохраняем URL если изображение не удалено
       welcomeButtons,
       reminders,
     };
@@ -344,6 +364,15 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
       if (this.reminderImageFiles[index]) {
         files.reminderImages[index] = this.reminderImageFiles[index]!;
       }
+    });
+
+    // Отладочная информация
+    console.log('Saving scene:', {
+      sceneId: scene.sceneId,
+      welcomeImageUrl: scene.welcomeImageUrl,
+      welcomeImageFile: files.welcomeImage ? 'present' : 'absent',
+      reminderImagesCount: Object.keys(files.reminderImages).length,
+      remindersWithImageUrl: reminders.filter(r => r.imageUrl).length
     });
 
     this.save.emit({scene, files});
@@ -614,7 +643,10 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
     const file = event.target.files[0];
     if (file) {
       this.reminderImageFiles[reminderIndex] = file;
+      this.reminderImagesRemoved.delete(reminderIndex); // Сбрасываем флаг удаления при загрузке нового файла
     }
+    // Очищаем input, чтобы можно было загрузить тот же файл снова
+    event.target.value = '';
   }
 
   removeWelcomeImage(): void {
@@ -624,6 +656,7 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
 
   removeReminderImage(reminderIndex: number): void {
     this.reminderImageFiles[reminderIndex] = null;
+    this.reminderImagesRemoved.add(reminderIndex); // Помечаем, что изображение удалено
   }
 
   // Получить URL для превью изображения сцены
