@@ -30,7 +30,10 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
   @Input() scene: SceneWithPreview | null = null;
   @Input() loading: boolean = false;
   @Output() visibleChange = new EventEmitter<boolean>();
-  @Output() save = new EventEmitter<{scene: Scene, files: {welcomeImage?: File, reminderImages: {[key: number]: File}}}>();
+  @Output() save = new EventEmitter<{
+    scene: Scene;
+    files: { welcomeImage?: File; reminderImages: { [key: number]: File } };
+  }>();
 
   @ViewChild('welcomeTextRef', { static: false })
   welcomeTextRef!: ElementRef<HTMLTextAreaElement>;
@@ -137,7 +140,7 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
     this.welcomeImageFile = null;
     this.welcomeImageRemoved = false;
     this.reminderImagesRemoved.clear();
-    
+
     // Отладочная информация
     console.log('Loading scene:', this.scene.sceneId);
     console.log('welcomeImageUrl:', this.scene.welcomeImageUrl);
@@ -339,9 +342,9 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
     });
 
     // Определяем welcomeImageUrl: сохраняем существующий URL, если изображение не удалено
-    const welcomeImageUrl = this.welcomeImageRemoved 
-      ? undefined 
-      : (this.scene?.welcomeImageUrl || undefined);
+    const welcomeImageUrl = this.welcomeImageRemoved
+      ? undefined
+      : this.scene?.welcomeImageUrl || undefined;
 
     const scene: Scene = {
       sceneId: this.sceneForm.get('sceneId')?.value,
@@ -353,13 +356,16 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
     };
 
     // Собираем файлы для отправки
-    const files: {welcomeImage?: File, reminderImages: {[key: number]: File}} = {
+    const files: {
+      welcomeImage?: File;
+      reminderImages: { [key: number]: File };
+    } = {
       welcomeImage: this.welcomeImageFile || undefined,
-      reminderImages: {}
+      reminderImages: {},
     };
 
     // Добавляем файлы изображений напоминаний
-    Object.keys(this.reminderImageFiles).forEach(key => {
+    Object.keys(this.reminderImageFiles).forEach((key) => {
       const index = parseInt(key);
       if (this.reminderImageFiles[index]) {
         files.reminderImages[index] = this.reminderImageFiles[index]!;
@@ -372,10 +378,10 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
       welcomeImageUrl: scene.welcomeImageUrl,
       welcomeImageFile: files.welcomeImage ? 'present' : 'absent',
       reminderImagesCount: Object.keys(files.reminderImages).length,
-      remindersWithImageUrl: reminders.filter(r => r.imageUrl).length
+      remindersWithImageUrl: reminders.filter((r) => r.imageUrl).length,
     });
 
-    this.save.emit({scene, files});
+    this.save.emit({ scene, files });
   }
 
   // Конвертация миллисекунд в дни, часы, минуты, секунды
