@@ -29,6 +29,7 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
   @Input() visible: boolean = false;
   @Input() scene: SceneWithPreview | null = null;
   @Input() loading: boolean = false;
+  @Input() allScenes: SceneWithPreview[] = []; // Список всех сцен для autocomplete
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() save = new EventEmitter<{
     scene: Scene;
@@ -56,6 +57,9 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
   currentReminderIndex: number = -1;
   selectedTextForLink: string = '';
 
+  // Для autocomplete
+  sceneIdSuggestions: string[] = [];
+
   constructor(private fb: FormBuilder, private messageService: MessageService) {
     this.sceneForm = this.fb.group({
       sceneId: ['', [Validators.required]],
@@ -72,6 +76,8 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
     } else {
       this.clearForm();
     }
+    // Инициализируем suggestions при загрузке
+    this.sceneIdSuggestions = this.getSceneIdSuggestions();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -81,6 +87,10 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
       } else {
         this.clearForm();
       }
+    }
+    // Обновляем suggestions при изменении списка сцен
+    if (changes['allScenes']) {
+      this.sceneIdSuggestions = this.getSceneIdSuggestions();
     }
   }
 
@@ -702,5 +712,30 @@ export class EditFunnelModalComponent implements OnInit, OnChanges {
       return this.scene.reminders[reminderIndex].imageUrl || null;
     }
     return null;
+  }
+
+  // Получить список всех sceneId для autocomplete
+  getSceneIdSuggestions(): string[] {
+    if (!this.allScenes || this.allScenes.length === 0) {
+      return [];
+    }
+    // Исключаем текущую сцену из списка, если она редактируется
+    const currentSceneId = this.scene?.sceneId;
+    return this.allScenes
+      .filter((s) => s.sceneId !== currentSceneId)
+      .map((s) => s.sceneId);
+  }
+
+  // Фильтрация для autocomplete
+  filterSceneIds(event: any): void {
+    const query = event.query?.toLowerCase() || '';
+    const allSuggestions = this.getSceneIdSuggestions();
+    if (!query) {
+      this.sceneIdSuggestions = allSuggestions;
+    } else {
+      this.sceneIdSuggestions = allSuggestions.filter((id) =>
+        id.toLowerCase().includes(query)
+      );
+    }
   }
 }

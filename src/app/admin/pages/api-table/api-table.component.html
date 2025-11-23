@@ -189,7 +189,12 @@
             </span>
           </td>
           <td>{{ user.email }}</td>
-          <td>{{ user.name }}</td>
+          <td>
+            <span style="display: inline-flex; align-items: center;">
+              {{ user.name }}
+              <p-badge *ngIf="user.isSpot === true" value="Спот" severity="info" styleClass="api-spot-badge"></p-badge>
+            </span>
+          </td>
           <td>{{ getMarketName(user.market) }}</td>
           <td *ngIf="isSuperAdmin">{{ user.rev_id }}</td>
           <td>{{user.botIds.length }}</td>

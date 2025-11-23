@@ -23,6 +23,13 @@
             </div>
 
             <div class="form-section">
+                <div class="field-checkbox">
+                    <p-checkbox formControlName="isSpot" inputId="isSpot" [binary]="true"></p-checkbox>
+                    <label for="isSpot" class="checkbox-label">Спот стратегия</label>
+                </div>
+            </div>
+
+            <div class="form-section">
                 <h4>Описание стратегии (Русский):</h4>
                 <textarea pInputTextarea formControlName="description" class="strategy-textarea"
                     placeholder="Введите описание на русском" rows="5"

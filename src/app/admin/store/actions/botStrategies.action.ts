@@ -28,6 +28,7 @@ export const editBotStrategyAction = createAction(
     descriptionEn: string;
     minDeposit?: number;
     actualLeverage?: number;
+    isSpot?: boolean;
   }>()
 );
 

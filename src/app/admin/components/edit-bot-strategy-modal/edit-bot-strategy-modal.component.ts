@@ -26,6 +26,7 @@ export class EditBotStrategyModalComponent implements OnChanges {
     nameEn: string;
     description: string;
     descriptionEn: string;
+    isSpot?: boolean;
   }>();
 
   strategyForm: FormGroup;
@@ -36,6 +37,7 @@ export class EditBotStrategyModalComponent implements OnChanges {
       nameEn: ['', Validators.required],
       description: ['', Validators.required],
       descriptionEn: ['', Validators.required],
+      isSpot: [false],
     });
   }
 
@@ -51,6 +53,7 @@ export class EditBotStrategyModalComponent implements OnChanges {
         nameEn: strategy.nameEn || '',
         description: strategy.description || '',
         descriptionEn: strategy.descriptionEn || '',
+        isSpot: strategy.isSpot || false,
       });
     }
   }
@@ -84,7 +87,7 @@ export class EditBotStrategyModalComponent implements OnChanges {
       return;
     }
 
-    const { name, nameEn, description, descriptionEn } =
+    const { name, nameEn, description, descriptionEn, isSpot } =
       this.strategyForm.value;
 
     this.save.emit({
@@ -93,6 +96,7 @@ export class EditBotStrategyModalComponent implements OnChanges {
       nameEn: nameEn.trim(),
       description: description.trim(),
       descriptionEn: descriptionEn.trim(),
+      isSpot: isSpot || false,
     });
   }
 }

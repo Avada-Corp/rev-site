@@ -10,6 +10,7 @@ export interface CurrentUserApi {
   startedBotLongCount: string;
   startedBotShortCount: string;
   botIds: string[];
+  isSpot?: boolean;
 }
 export interface EditApi {
   key: string;

@@ -89,7 +89,17 @@
                   </div>
                   <div class="form-field">
                     <label>Target Scene ID <span class="required">*</span></label>
-                    <input type="text" pInputText formControlName="targetSceneId" placeholder="ID целевой сцены" />
+                    <p-autoComplete 
+                      formControlName="targetSceneId" 
+                      [suggestions]="sceneIdSuggestions"
+                      (completeMethod)="filterSceneIds($event)"
+                      [dropdown]="true"
+                      placeholder="ID целевой сцены"
+                      [forceSelection]="false"
+                      [showEmptyMessage]="true"
+                      emptyMessage="Нет доступных сцен"
+                      (onFocus)="sceneIdSuggestions = getSceneIdSuggestions()">
+                    </p-autoComplete>
                   </div>
                 </div>
                 <p-button icon="pi pi-trash" styleClass="p-button-danger p-button-sm"
@@ -220,7 +230,17 @@
                             </div>
                             <div class="form-field">
                               <label>Действие <span class="required">*</span></label>
-                              <input type="text" pInputText formControlName="action" placeholder="Действие кнопки" />
+                              <p-autoComplete 
+                                formControlName="action" 
+                                [suggestions]="sceneIdSuggestions"
+                                (completeMethod)="filterSceneIds($event)"
+                                [dropdown]="true"
+                                placeholder="Действие кнопки (sceneId)"
+                                [forceSelection]="false"
+                                [showEmptyMessage]="true"
+                                emptyMessage="Нет доступных сцен"
+                                (onFocus)="sceneIdSuggestions = getSceneIdSuggestions()">
+                              </p-autoComplete>
                             </div>
                           </div>
                           <p-button icon="pi pi-trash" styleClass="p-button-danger p-button-sm"

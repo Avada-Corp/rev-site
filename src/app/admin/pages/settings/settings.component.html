@@ -59,6 +59,7 @@
                 <div class="strategy-info">
                     <div class="strategy-name">
                         {{ strategy.name }} ({{ strategy.strategyId }})
+                        <p-badge *ngIf="strategy.isSpot === true" value="Спот" severity="info" styleClass="strategy-spot-badge"></p-badge>
                         <i class="pi pi-info-circle strategy-info-icon" (click)="onShowCalculations(strategy)"
                             pTooltip="Показать примеры расчетов"></i>
                     </div>
@@ -107,8 +108,8 @@
 </app-edit-strategy-money-policy-modal>
 
 <!-- Modal for editing funnel -->
-<app-edit-funnel-modal [visible]="isFunnelModalVisible"
-    [scene]="selectedScene" [loading]="(isScenesLoading$ | async) || false" 
+<app-edit-funnel-modal *ngIf="vm$ | async as vm" [visible]="isFunnelModalVisible"
+    [scene]="selectedScene" [loading]="vm.isScenesLoading" [allScenes]="vm.scenes"
     (visibleChange)="onFunnelModalClose()" (save)="onSaveScene($event)">
 </app-edit-funnel-modal>
 

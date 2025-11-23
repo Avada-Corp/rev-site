@@ -87,6 +87,7 @@ export class AdminService {
     descriptionEn: string;
     minDeposit?: number;
     actualLeverage?: number;
+    isSpot?: boolean;
   }) {
     const url = environment.apiUrl + '/admin/botStrategy/edit';
     return this.http.post<GetterResponseInterface<BotStrategy>>(url, data, {

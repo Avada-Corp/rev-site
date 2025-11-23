@@ -13,6 +13,7 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { DropdownModule } from 'primeng/dropdown';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 import { GetBotsEffect } from './store/effects/bots.effect';
 import { GetBotStrategiesEffect } from './store/effects/botStrategies.effect';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -157,6 +158,7 @@ import { SetApiStrategyModalComponent } from './components/set-api-strategy-moda
     InputTextModule,
     DragDropModule,
     DropdownModule,
+    AutoCompleteModule,
     MultiSelectModule,
     InputNumberModule,
     RadioButtonModule,

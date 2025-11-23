@@ -31,6 +31,7 @@ export interface BotStrategy {
   __v?: number;
   minDeposit?: number;
   actualLeverage?: number;
+  isSpot?: boolean;
 }
 
 export interface StrategyMoneyPolicy {
@@ -85,6 +86,7 @@ export interface Api {
   rev_id: string;
   isTransferHistoryAvailable?: boolean;
   strategyId?: string;
+  isSpot?: boolean;
   botIds: Array<{
     bot_id: string;
     rev_id: string;

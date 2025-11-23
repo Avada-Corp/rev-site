@@ -200,6 +200,7 @@ export class SettingsComponent implements OnInit {
     nameEn: string;
     description: string;
     descriptionEn: string;
+    isSpot?: boolean;
   }) {
     this.store.dispatch(editBotStrategyAction(data));
     this.isStrategyModalVisible = false;
@@ -238,6 +239,7 @@ export class SettingsComponent implements OnInit {
         descriptionEn: this.selectedStrategy.descriptionEn,
         minDeposit: data.minDeposit,
         actualLeverage: data.actualLeverage,
+        isSpot: this.selectedStrategy.isSpot,
       })
     );
     this.isMoneyPolicyModalVisible = false;

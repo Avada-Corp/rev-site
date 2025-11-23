@@ -27,7 +27,12 @@
             </ng-template>
             <ng-template pTemplate="body" let-api>
                 <tr>
-                    <td>{{ api.name }}</td>
+                    <td>
+                        <span style="display: inline-flex; align-items: center;">
+                            {{ api.name }}
+                            <p-badge *ngIf="api.isSpot === true" value="Спот" severity="info" styleClass="api-spot-badge"></p-badge>
+                        </span>
+                    </td>
                     <td>{{ api.market }}</td>
                     <td>{{ api.key.slice(0, 10) }}...</td>
                     <td>{{ api.secret }}</td>

@@ -2,12 +2,13 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 10px 0;
+  padding: 20px 0;
 
   .form-section {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    padding: 0 10px;
 
     h4 {
       color: #333;
@@ -33,6 +34,19 @@
     small.p-error {
       color: #e24c4c;
       font-size: 12px;
+    }
+
+    .field-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .checkbox-label {
+        margin: 0;
+        font-size: 14px;
+        color: #333;
+        cursor: pointer;
+      }
     }
   }
 }

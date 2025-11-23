@@ -32,6 +32,7 @@ import { StatComponent } from './stat/stat.component';
 import { CalendarModule } from 'primeng/calendar';
 import { FormsModule } from '@angular/forms';
 import { GetReportsEffect } from './store/effects/getReports.effect';
+import { BadgeModule } from 'primeng/badge';
 
 @NgModule({
   declarations: [
@@ -54,6 +55,7 @@ import { GetReportsEffect } from './store/effects/getReports.effect';
     FormsModule,
     TableModule,
     CalendarModule,
+    BadgeModule,
     StoreModule.forFeature('page', reducers),
     EffectsModule.forFeature([
       CreateApiEffect,

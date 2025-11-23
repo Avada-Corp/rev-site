@@ -67,6 +67,7 @@ export class GetBotStrategiesEffect {
           descriptionEn,
           minDeposit,
           actualLeverage,
+          isSpot,
         }) => {
           const payload = {
             strategyId,
@@ -76,6 +77,7 @@ export class GetBotStrategiesEffect {
             descriptionEn,
             minDeposit,
             actualLeverage,
+            isSpot,
           };
           console.log('editBotStrategy$ payload:', payload);
           
