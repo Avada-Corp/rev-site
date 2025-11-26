@@ -29,15 +29,50 @@
         </p>
 
         <div class="scenes-list-settings" *ngIf="vm.scenes && vm.scenes.length > 0">
-            <div *ngFor="let scene of vm.scenes" class="scene-item-wrapper">
-                <p-button [label]="scene.name || scene.sceneId" 
-                    icon="pi pi-pencil" styleClass="p-button-sm p-button-outlined scene-button"
-                    (click)="onEditFunnel(scene)" [pTooltip]="'Редактировать сцену ' + (scene.name || scene.sceneId)">
-                </p-button>
-                <p-button icon="pi pi-trash" 
-                    styleClass="p-button-sm p-button-danger p-button-outlined scene-delete-button"
-                    (click)="onDeleteScene(scene)" [pTooltip]="'Удалить сцену ' + (scene.name || scene.sceneId)">
-                </p-button>
+            <div *ngFor="let scene of vm.scenes" class="scene-card">
+                <div class="scene-card-header">
+                    <div class="scene-card-title">{{ scene.name || scene.sceneId }}</div>
+                    <div class="scene-card-actions">
+                        <p-button icon="pi pi-pencil" 
+                            styleClass="p-button-sm p-button-outlined"
+                            (click)="onEditFunnel(scene)" [pTooltip]="'Редактировать сцену'">
+                        </p-button>
+                        <p-button icon="pi pi-trash" 
+                            styleClass="p-button-sm p-button-danger p-button-outlined"
+                            (click)="onDeleteScene(scene)" [pTooltip]="'Удалить сцену'">
+                        </p-button>
+                    </div>
+                </div>
+                
+                <!-- Визуальная схема сцены -->
+                <div class="scene-flow-diagram">
+                    <!-- Приветственное сообщение -->
+                    <div class="flow-node flow-node-welcome" [pTooltip]="scene.welcomeText || 'Приветственное сообщение'">
+                        <i class="pi pi-comment"></i>
+                        <span class="node-label">Сообщение</span>
+                    </div>
+                    
+                    <!-- Напоминания -->
+                    <ng-container *ngFor="let reminder of scene.reminders; let i = index">
+                        <!-- Стрелка с временем -->
+                        <div class="flow-arrow">
+                            <div class="arrow-line"></div>
+                            <div class="arrow-time">{{ formatReminderTime(reminder.timer) }}</div>
+                            <div class="arrow-head"></div>
+                        </div>
+                        
+                        <!-- Узел напоминания -->
+                        <div class="flow-node flow-node-reminder" [pTooltip]="reminder.text || 'Напоминание ' + (i + 1)">
+                            <i class="pi pi-bell"></i>
+                            <span class="node-label">{{ i + 1 }}</span>
+                        </div>
+                    </ng-container>
+                    
+                    <!-- Если нет напоминаний -->
+                    <div class="no-reminders" *ngIf="!scene.reminders || scene.reminders.length === 0">
+                        <span class="no-reminders-text">Нет напоминаний</span>
+                    </div>
+                </div>
             </div>
         </div>
 
