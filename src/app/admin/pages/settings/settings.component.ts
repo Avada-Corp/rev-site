@@ -433,22 +433,25 @@ export class SettingsComponent implements OnInit {
     return (actualLeverage / realLeverage) * deposit;
   }
 
-  // Форматирование времени напоминания
-  formatReminderTime(seconds: number): string {
-    if (!seconds || seconds <= 0) {
+  // Форматирование времени напоминания (время в миллисекундах)
+  formatReminderTime(ms: number): string {
+    if (!ms || ms <= 0) {
       return '0с';
     }
 
-    const days = Math.floor(seconds / 86400);
-    const hours = Math.floor((seconds % 86400) / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
+    // Конвертируем миллисекунды в секунды
+    const totalSeconds = Math.floor(ms / 1000);
+
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
 
     const parts: string[] = [];
     if (days > 0) parts.push(`${days}д`);
     if (hours > 0) parts.push(`${hours}ч`);
     if (minutes > 0) parts.push(`${minutes}м`);
-    if (secs > 0 && days === 0) parts.push(`${secs}с`); // Секунды только если нет дней
+    if (secs > 0 && days === 0 && hours === 0) parts.push(`${secs}с`); // Секунды только если нет дней и часов
 
     return parts.length > 0 ? parts.join(' ') : '0с';
   }
