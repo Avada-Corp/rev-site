@@ -30,16 +30,19 @@ import {
 import { BotSettings } from 'src/app/shared/types/botSettings.interface';
 import { PersistanceService } from 'src/app/shared/services/persistance.service';
 import { of, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, switchMap, take } from 'rxjs/operators';
 import { CommissionType } from '../shared';
 import { UserRole } from 'src/app/shared/types/userRole.enum';
 import { parseMultipartFormData } from 'src/app/shared/helpers/helpers';
+import { Store, select } from '@ngrx/store';
+import { currentUserSelector } from 'src/app/auth/store/selectors';
 
 @Injectable()
 export class AdminService {
   constructor(
     private http: HttpClient,
-    private persistanceService: PersistanceService
+    private persistanceService: PersistanceService,
+    private store: Store
   ) {}
 
   getHeaders() {
@@ -330,18 +333,50 @@ export class AdminService {
 
   sendPersonalMessage(email: string, message: string) {
     const url = environment.apiUrl + '/admin/sendPersonalMessage';
-    const data = { email, message };
-    return this.http.post<GetterResponseInterface<any>>(url, data, {
-      headers: this.getHeaders(),
-    });
+    return this.store.pipe(
+      select(currentUserSelector),
+      take(1),
+      switchMap((currentUser) => {
+        const data = {
+          email,
+          message,
+          senderUser: currentUser
+            ? {
+                email: currentUser.email,
+                tgAccount: currentUser.tgAccount,
+                userRole: currentUser.userRole,
+              }
+            : null,
+        };
+        return this.http.post<GetterResponseInterface<any>>(url, data, {
+          headers: this.getHeaders(),
+        });
+      })
+    );
   }
 
   sendPersonalMessagesBulk(users: string[], message: string) {
     const url = environment.apiUrl + '/admin/sendPersonalMessagesBulk';
-    const data = { users, message };
-    return this.http.post<GetterResponseInterface<any>>(url, data, {
-      headers: this.getHeaders(),
-    });
+    return this.store.pipe(
+      select(currentUserSelector),
+      take(1),
+      switchMap((currentUser) => {
+        const data = {
+          users,
+          message,
+          senderUser: currentUser
+            ? {
+                email: currentUser.email,
+                tgAccount: currentUser.tgAccount,
+                userRole: currentUser.userRole,
+              }
+            : null,
+        };
+        return this.http.post<GetterResponseInterface<any>>(url, data, {
+          headers: this.getHeaders(),
+        });
+      })
+    );
   }
 
   getUserCommissionReport(email: string) {
@@ -650,16 +685,20 @@ export class AdminService {
         map((response) => {
           // Проверяем Content-Type для определения формата ответа
           const contentType = response.headers.get('content-type') || '';
-          
+
           // Если это не multipart, значит ошибка в формате JSON
           if (!contentType.includes('multipart/form-data')) {
             try {
               const decoder = new TextDecoder();
-              const jsonText = decoder.decode(response.body || new ArrayBuffer(0));
+              const jsonText = decoder.decode(
+                response.body || new ArrayBuffer(0)
+              );
               const errorResponse = JSON.parse(jsonText);
               return {
                 status: false,
-                errors: errorResponse.errors || ['Ошибка при получении списка сцен'],
+                errors: errorResponse.errors || [
+                  'Ошибка при получении списка сцен',
+                ],
                 messages: errorResponse.messages || [],
                 data: [] as SceneWithPreview[],
               };
@@ -710,36 +749,43 @@ export class AdminService {
               }
             } else {
               // Сохраняем изображения как Blob
-              imagesMap.set(part.name, new Blob([part.data], { type: part.type || 'image/jpeg' }));
+              imagesMap.set(
+                part.name,
+                new Blob([part.data], { type: part.type || 'image/jpeg' })
+              );
             }
           }
 
           // Собираем результат: для каждой сцены находим соответствующие изображения
-          const scenesWithPreviews: SceneWithPreview[] = scenesData.map((scene, sceneIndex) => {
-            const result: SceneWithPreview = {
-              ...scene,
-              reminderImagePreviewUrls: new Map(),
-            };
+          const scenesWithPreviews: SceneWithPreview[] = scenesData.map(
+            (scene, sceneIndex) => {
+              const result: SceneWithPreview = {
+                ...scene,
+                reminderImagePreviewUrls: new Map(),
+              };
 
-            // Ищем welcomeImage для этой сцены
-            const welcomeImageKey = `welcomeImage_${sceneIndex}`;
-            if (imagesMap.has(welcomeImageKey)) {
-              result.welcomeImagePreviewUrl = URL.createObjectURL(imagesMap.get(welcomeImageKey)!);
-            }
-
-            // Ищем reminderImages для этой сцены
-            scene.reminders.forEach((_, reminderIndex) => {
-              const reminderImageKey = `reminderImage_${sceneIndex}_${reminderIndex}`;
-              if (imagesMap.has(reminderImageKey)) {
-                result.reminderImagePreviewUrls.set(
-                  reminderIndex,
-                  URL.createObjectURL(imagesMap.get(reminderImageKey)!)
+              // Ищем welcomeImage для этой сцены
+              const welcomeImageKey = `welcomeImage_${sceneIndex}`;
+              if (imagesMap.has(welcomeImageKey)) {
+                result.welcomeImagePreviewUrl = URL.createObjectURL(
+                  imagesMap.get(welcomeImageKey)!
                 );
               }
-            });
 
-            return result;
-          });
+              // Ищем reminderImages для этой сцены
+              scene.reminders.forEach((_, reminderIndex) => {
+                const reminderImageKey = `reminderImage_${sceneIndex}_${reminderIndex}`;
+                if (imagesMap.has(reminderImageKey)) {
+                  result.reminderImagePreviewUrls.set(
+                    reminderIndex,
+                    URL.createObjectURL(imagesMap.get(reminderImageKey)!)
+                  );
+                }
+              });
+
+              return result;
+            }
+          );
 
           return {
             status: true,
@@ -758,7 +804,10 @@ export class AdminService {
     });
   }
 
-  updateScene(scene: Scene, files: {welcomeImage?: File, reminderImages: {[key: number]: File}}) {
+  updateScene(
+    scene: Scene,
+    files: { welcomeImage?: File; reminderImages: { [key: number]: File } }
+  ) {
     const url = environment.apiUrl + '/admin/scene';
     const formData = new FormData();
 
@@ -770,7 +819,7 @@ export class AdminService {
     formData.append('welcomeText', scene.welcomeText);
     formData.append('welcomeButtons', JSON.stringify(scene.welcomeButtons));
     formData.append('reminders', JSON.stringify(scene.reminders));
-    
+
     // Добавляем welcomeImageUrl, если он есть (для сохранения существующего URL)
     if (scene.welcomeImageUrl) {
       formData.append('welcomeImageUrl', scene.welcomeImageUrl);
@@ -781,7 +830,7 @@ export class AdminService {
       formData.append('welcomeImage', files.welcomeImage);
     }
 
-    Object.keys(files.reminderImages).forEach(key => {
+    Object.keys(files.reminderImages).forEach((key) => {
       const index = parseInt(key);
       formData.append(`reminderImage_${index}`, files.reminderImages[index]);
     });
@@ -791,7 +840,10 @@ export class AdminService {
     });
   }
 
-  createScene(scene: Scene, files: {welcomeImage?: File, reminderImages: {[key: number]: File}}) {
+  createScene(
+    scene: Scene,
+    files: { welcomeImage?: File; reminderImages: { [key: number]: File } }
+  ) {
     const url = environment.apiUrl + '/admin/scenes/create';
     const formData = new FormData();
 
@@ -809,7 +861,7 @@ export class AdminService {
       formData.append('welcomeImage', files.welcomeImage);
     }
 
-    Object.keys(files.reminderImages).forEach(key => {
+    Object.keys(files.reminderImages).forEach((key) => {
       const index = parseInt(key);
       formData.append(`reminderImage_${index}`, files.reminderImages[index]);
     });
