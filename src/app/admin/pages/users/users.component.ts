@@ -94,6 +94,16 @@ export class UsersComponent implements OnInit, OnDestroy {
   sendingBulkMessage = false;
   selectedUsersListDialogVisible = false;
 
+  // Для отображения статистики отправки
+  statsDialogVisible = false;
+  bulkMessageStats: {
+    total: number;
+    sent: number;
+    skippedDuplicates: number;
+    failed: number;
+    deduplicationMinutes: number;
+  } | null = null;
+
   // Для редактирования комиссий и рефералов
   isCommissionSet: boolean = false;
   isRefSet: boolean = false;
@@ -998,6 +1008,11 @@ export class UsersComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           if (response.status) {
+            // Извлекаем статистику из ответа
+            if (response.data && response.data.stats) {
+              this.bulkMessageStats = response.data.stats;
+              this.statsDialogVisible = true;
+            }
             this.messageService.add({
               severity: 'success',
               summary: 'Успешно',
@@ -1035,5 +1050,10 @@ export class UsersComponent implements OnInit, OnDestroy {
           this.sendingBulkMessage = false;
         },
       });
+  }
+
+  closeStatsDialog() {
+    this.statsDialogVisible = false;
+    this.bulkMessageStats = null;
   }
 }

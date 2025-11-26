@@ -337,3 +337,62 @@
         </div>
     </ng-template>
 </p-dialog>
+
+<!-- Диалог статистики отправки сообщений -->
+<p-dialog header="Статистика отправки сообщений" [(visible)]="statsDialogVisible"
+    [style]="{width: '50vw', minWidth: '500px'}" [modal]="true" *ngIf="bulkMessageStats">
+    <div class="stats-dialog-content">
+        <div class="stats-grid">
+            <div class="stat-card total">
+                <div class="stat-icon">
+                    <i class="pi pi-users"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-label">Всего</div>
+                    <div class="stat-value">{{ bulkMessageStats.total }}</div>
+                </div>
+            </div>
+
+            <div class="stat-card sent">
+                <div class="stat-icon">
+                    <i class="pi pi-check-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-label">Отправлено</div>
+                    <div class="stat-value">{{ bulkMessageStats.sent }}</div>
+                </div>
+            </div>
+
+            <div class="stat-card skipped">
+                <div class="stat-icon">
+                    <i class="pi pi-exclamation-triangle"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-label">Пропущено (дубликаты)</div>
+                    <div class="stat-value">{{ bulkMessageStats.skippedDuplicates }}</div>
+                </div>
+            </div>
+
+            <div class="stat-card failed">
+                <div class="stat-icon">
+                    <i class="pi pi-times-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-label">Ошибки</div>
+                    <div class="stat-value">{{ bulkMessageStats.failed }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="deduplication-info" *ngIf="bulkMessageStats.deduplicationMinutes">
+            <i class="pi pi-info-circle"></i>
+            <span>Период дедупликации: {{ bulkMessageStats.deduplicationMinutes }} минут</span>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <div class="dialog-footer">
+            <p-button label="Закрыть" severity="primary" (click)="closeStatsDialog()">
+            </p-button>
+        </div>
+    </ng-template>
+</p-dialog>

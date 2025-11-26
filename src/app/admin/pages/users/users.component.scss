@@ -483,3 +483,136 @@
     }
   }
 }
+
+// Диалог статистики отправки сообщений
+.stats-dialog-content {
+  padding: 1rem 0;
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-radius: 8px;
+    background: #f8f9fa;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .stat-info {
+      flex: 1;
+
+      .stat-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+      }
+
+      .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        line-height: 1;
+      }
+    }
+
+    &.total {
+      border-color: #007bff;
+      background: linear-gradient(135deg, #e7f3ff 0%, #cfe7ff 100%);
+
+      .stat-icon {
+        background: #007bff;
+        color: white;
+      }
+
+      .stat-value {
+        color: #007bff;
+      }
+    }
+
+    &.sent {
+      border-color: #28a745;
+      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+
+      .stat-icon {
+        background: #28a745;
+        color: white;
+      }
+
+      .stat-value {
+        color: #28a745;
+      }
+    }
+
+    &.skipped {
+      border-color: #ffc107;
+      background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+
+      .stat-icon {
+        background: #ffc107;
+        color: #333;
+      }
+
+      .stat-value {
+        color: #f57c00;
+      }
+    }
+
+    &.failed {
+      border-color: #dc3545;
+      background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+
+      .stat-icon {
+        background: #dc3545;
+        color: white;
+      }
+
+      .stat-value {
+        color: #dc3545;
+      }
+    }
+  }
+
+  .deduplication-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #e3f2fd;
+    border-left: 4px solid #2196f3;
+    border-radius: 4px;
+    color: #1976d2;
+    font-size: 0.9rem;
+    font-weight: 500;
+
+    i {
+      font-size: 1.1rem;
+    }
+  }
+}
