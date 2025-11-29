@@ -894,4 +894,12 @@ export class AdminService {
       headers: this.getHeaders(),
     });
   }
+
+  updateApiStatusManual(apiId: string, status: string | null) {
+    const url = environment.apiUrl + '/site/updateApiStatusManual';
+    const data = { apiId, status };
+    return this.http.post<GetterResponseInterface<null>>(url, data, {
+      headers: this.getHeaders(),
+    });
+  }
 }

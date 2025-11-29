@@ -166,12 +166,16 @@
               (click)="openSetApiStrategyDialog(user)" pTooltip="Изменить стратегию">
             </p-button>
           </td>
-          <td>{{ user.status?.status || "Stopped" }}<span class="days-badge"
-              *ngIf="user.market === '42' && getDays(user) > 0" [ngClass]="{
+          <td>
+            <span>{{ user.status?.status || "Stopped" }}</span>
+            <p-button icon="pi pi-pencil" styleClass="p-button-text p-button-rounded ml-1" size="small"
+              pTooltip="Изменить статус" (click)="editApiStatus(user)"></p-button>
+            <span class="days-badge" *ngIf="user.market === '42' && getDays(user) > 0" [ngClass]="{
             'days-critical': getDays(user) < 15,
             'days-warning': getDays(user) >= 15 && getDays(user) <= 30,
             'days-good': getDays(user) > 30
-          }">{{getDays(user)}}</span></td>
+          }">{{getDays(user)}}</span>
+          </td>
           <td>
             {{getApiBalance(user)}} USDT
           </td>
@@ -438,4 +442,31 @@
   <app-set-api-strategy-modal *ngIf="currentApiForStrategy" [email]="currentApiForStrategy.email"
     [apiName]="currentApiForStrategy.name" (closeEvent)="closeSetApiStrategyDialog()">
   </app-set-api-strategy-modal>
+</p-dialog>
+
+<!-- Диалог изменения статуса API -->
+<p-dialog header="Изменить статус для API: {{currentApiForStatus?.name}} ({{currentApiForStatus?.username || currentApiForStatus?.email}})"
+  [(visible)]="isApiStatusDialogVisible" [style]="{width: '50vw', height: '40vh', display: 'flex', justifyContent: 'center'}" [modal]="true"
+  class="api-status-dialog">
+  <div class="flex flex-column justify-content-between h-full" style="gap: 1rem;">
+    <div class="field">
+      <label for="apiStatus">Статус API:</label>
+      <p-selectButton [options]="apiStatusOptions" [(ngModel)]="selectedApiStatus" [optionLabel]="'label'"
+        [optionValue]="'value'">
+      </p-selectButton>
+      <small class="text-gray-500 mt-2 block">
+        Выберите статус для API ключа или сбросьте его
+      </small>
+    </div>
+    <div class="flex justify-content-between" style="gap: 1rem;">
+      <p-button label="Сбросить" styleClass="p-button-secondary" (click)="resetApiStatus()"
+        [disabled]="savingApiStatus"></p-button>
+      <div class="flex" style="gap: 0.75rem;">
+        <p-button label="Отмена" styleClass="p-button-secondary" (click)="closeApiStatusDialog()"
+          [disabled]="savingApiStatus"></p-button>
+        <p-button label="Сохранить" styleClass="p-button-primary" (click)="onApiStatusChange()"
+          [disabled]="savingApiStatus"></p-button>
+      </div>
+    </div>
+  </div>
 </p-dialog>

@@ -94,6 +94,12 @@ export class ApiTableComponent implements OnInit, OnDestroy {
   isSetApiStrategyDialogVisible: boolean = false;
   currentApiForStrategy: ApiWithEmail | null = null;
 
+  // Диалог изменения статуса API
+  isApiStatusDialogVisible: boolean = false;
+  currentApiForStatus: ApiWithEmail | null = null;
+  selectedApiStatus: string = 'Остановлен';
+  savingApiStatus: boolean = false;
+
   // Пагинация
   currentPage: number = 1;
   pageSize: number = 20000; // По умолчанию "Все"
@@ -1254,6 +1260,129 @@ export class ApiTableComponent implements OnInit, OnDestroy {
       (s) => s.strategyId === strategyId
     );
     return strategy ? strategy.name : '';
+  }
+
+  // Методы для изменения статуса API
+  apiStatusOptions = [
+    { label: 'Остановлен', value: 'Остановлен' },
+    { label: 'Запущен', value: 'Запущен' },
+  ];
+
+  editApiStatus(api: ApiWithEmail): void {
+    this.currentApiForStatus = api;
+    const currentStatus = api.status?.status || 'Stopped';
+    // Преобразуем английские статусы в русские для отображения
+    if (currentStatus === 'Stopped' || currentStatus === 'Остановлен') {
+      this.selectedApiStatus = 'Остановлен';
+    } else if (currentStatus === 'Started' || currentStatus === 'Запущен') {
+      this.selectedApiStatus = 'Запущен';
+    } else {
+      this.selectedApiStatus = 'Остановлен';
+    }
+    this.isApiStatusDialogVisible = true;
+  }
+
+  closeApiStatusDialog(): void {
+    this.isApiStatusDialogVisible = false;
+    this.currentApiForStatus = null;
+    this.selectedApiStatus = 'Остановлен';
+    this.savingApiStatus = false;
+  }
+
+  resetApiStatus(): void {
+    if (!this.currentApiForStatus) {
+      return;
+    }
+
+    this.savingApiStatus = true;
+    // Отправляем null для сброса статуса
+    this.adminService
+      .updateApiStatusManual(this.currentApiForStatus.rev_id, null)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.savingApiStatus = false;
+          if (response.status) {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Успешно',
+              detail: 'Статус API сброшен',
+            });
+            // Обновляем локально
+            if (this.currentApiForStatus?.status) {
+              this.currentApiForStatus.status.status = 'Stopped';
+            }
+            this.closeApiStatusDialog();
+          } else {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Ошибка',
+              detail: 'Не удалось сбросить статус API',
+            });
+          }
+        },
+        error: (error) => {
+          this.savingApiStatus = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Ошибка',
+            detail: 'Не удалось сбросить статус API',
+          });
+        },
+      });
+  }
+
+  onApiStatusChange(): void {
+    if (!this.currentApiForStatus) {
+      return;
+    }
+
+    this.savingApiStatus = true;
+
+    // Преобразуем русские статусы в английские для отправки
+    let statusToSend: string;
+    if (this.selectedApiStatus === 'Остановлен') {
+      statusToSend = 'Stopped';
+    } else if (this.selectedApiStatus === 'Запущен') {
+      statusToSend = 'Started';
+    } else {
+      statusToSend = 'Stopped';
+    }
+
+    this.adminService
+      .updateApiStatusManual(this.currentApiForStatus.rev_id, statusToSend)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.savingApiStatus = false;
+          if (response.status) {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Успешно',
+              detail: 'Статус API обновлен',
+            });
+            // Обновляем локально
+            if (this.currentApiForStatus?.status) {
+              this.currentApiForStatus.status.status = statusToSend;
+            }
+            this.closeApiStatusDialog();
+          } else {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Ошибка',
+              detail: 'Не удалось обновить статус API',
+            });
+          }
+        },
+        error: (error) => {
+          this.savingApiStatus = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Ошибка',
+            detail: 'Не удалось обновить статус API',
+          });
+        },
+      });
   }
 
   // --------------------------------------
