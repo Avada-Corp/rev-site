@@ -94,6 +94,7 @@ export interface Api {
 }
 
 export interface ApiWithEmail extends Api {
+  _id?: string;
   email: string;
   username: string;
   status: BotStatus;

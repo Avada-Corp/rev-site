@@ -49,6 +49,7 @@ import {
 import { currentUserSelector } from 'src/app/auth/store/selectors';
 
 interface UserRowData {
+  _id?: string;
   email: string;
   username: string | null;
   isConnected: boolean;
@@ -309,6 +310,7 @@ export class UsersComponent implements OnInit, OnDestroy {
     apiData.forEach((api) => {
       if (!userMap.has(api.email)) {
         userMap.set(api.email, {
+          _id: api._id,
           email: api.email,
           username: api.username,
           isConnected: true, // Все пользователи из /admin/users считаются активными
@@ -443,6 +445,7 @@ export class UsersComponent implements OnInit, OnDestroy {
       const term = searchTerm.toLowerCase();
       this.filteredUsers = this.users.filter(
         (user) =>
+          (user._id && user._id.toLowerCase().includes(term)) ||
           user.email.toLowerCase().includes(term) ||
           (user.username && user.username.toLowerCase().includes(term)) ||
           (user.parentRef && user.parentRef.toLowerCase().includes(term))
